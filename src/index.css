@@ -6,9 +6,9 @@ body {
 
 .key-color-main {
   /* Background : Blue */
-  background-color: #0045FB;
+  background-color: hsl(98, 100%, 78%);
   /* Text : White */
-  color: white
+  color: black
 }
 
 .main-header{

@@ -30,8 +30,8 @@ import React from 'react';
 import './index.css';
 
 import { createRoot } from 'react-dom/client'
-import Main from './rendererArea/screens/main';
+import Home from './rendererArea/home';
 
 document.body.innerHTML = '<div id="app"></div>';
 const root = createRoot(document.getElementById('app'));
-root.render(Main());
+root.render(Home());
