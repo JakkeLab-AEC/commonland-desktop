@@ -26,12 +26,11 @@
  * ```
  */
 
-import React from 'react';
 import './index.css';
 
 import { createRoot } from 'react-dom/client'
-import Home from './rendererArea/home';
+import HomeScreen from './rendererArea/homeScreen';
 
 document.body.innerHTML = '<div id="app"></div>';
 const root = createRoot(document.getElementById('app'));
-root.render(Home());
+root.render(<HomeScreen/>);

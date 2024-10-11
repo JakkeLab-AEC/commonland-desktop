@@ -4,11 +4,13 @@ body {
   
 }
 
+/* background-color: hsl(98, 100%, 78%); */
+
 .key-color-main {
   /* Background : Blue */
-  background-color: hsl(98, 100%, 78%);
+  background-color: #0045FB;
   /* Text : White */
-  color: black
+  color: white
 }
 
 .main-header{

@@ -5,7 +5,7 @@ import AccountButton from "./account/accountButton";
 import AccountPopup from "./account/accountPopup";
 import ServiceLogo from "./logo/servicelogo";
 import React from "react";
-import ButtonNeutral from "./buttons/buttonNeutral";
+import ButtonNeutral from "../buttons/buttonNeutral";
 
 
 export default function Header({appName}:{appName: string}) {

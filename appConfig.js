@@ -1,3 +1,3 @@
 export const appInfo = {
-    "ApplicationName" : "CommonLand"    
+    "ApplicationName" : "W-RWDesginer"    
 }
