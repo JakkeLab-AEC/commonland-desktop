@@ -1,7 +1,7 @@
 import { useHomeStore } from "../../../../rendererArea/homeStatus/homeStatusModel";
 import { ListBox } from "../../../../rendererArea/components/listbox/listBox"
 import { ListBoxItem } from "../../../../rendererArea/components/listbox/listBoxItem"
-import React from "react"
+import React, { useEffect } from "react"
 import { BoringEditor } from "./inspectors/boringEditor";
 import { useLanguageStore } from "../../../../rendererArea/language/languageStore";
 
@@ -20,7 +20,7 @@ interface InspectorContent {
     id: string
 }
 
-const InspectorContent:React.FC<InspectorContent> = ({id}) => {
+const InspectorContent:React.FC<InspectorContent> = () => {
     return (<BoringEditor />)
 }
 
@@ -39,9 +39,14 @@ export const BoringManager = () => {
     const onClickHandler = (id: string) => {
         setInspectorContent(<InspectorContent id={id}/>)
         setInspectorTitle(`${findValue('BoringEditor', 'editorHeader')} : ${sampleItems.get(id)}`);
-        setInspectorSize({width: 300, height: 400})
+        setInspectorSize({width: 440, height: 600})
         setInspectorVisiblity(true);
     }
+
+    useEffect(() => {
+        onClickHandler('1');
+    }, []);
+    
 
     return (
         <div className="flex flex-col">
@@ -49,7 +54,7 @@ export const BoringManager = () => {
                 {findValue('BoringManager', 'boringList')}
             </div>
             <div>
-                <ListBox height={400} items={sampleItems} onClickHandler={onClickHandler} header={findValue('BoringManager', 'boringList')}/>
+                <ListBox height={460} items={sampleItems} onClickHandler={onClickHandler} header={findValue('BoringManager', 'boringList')}/>
             </div>
         </div>
     )

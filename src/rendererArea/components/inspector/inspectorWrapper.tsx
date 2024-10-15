@@ -3,8 +3,8 @@ import { Inspector } from "./inspector"
 import { useHomeStore } from "../../../rendererArea/homeStatus/homeStatusModel";
 
 interface InspectorWrapperProps {
-    width?: number;
-    height?: number;
+    width: number;
+    height: number;
 }
 
 export const InspectorWrapper:React.FC<InspectorWrapperProps> = ({width, height}) => {
@@ -21,8 +21,7 @@ export const InspectorWrapper:React.FC<InspectorWrapperProps> = ({width, height}
 
     return (
         <div>
-            {inspectorVisibility && <Inspector title={inspectorTitle} width={width} height={height} onClickCloseHandler={onCloseHandler} children={inspetorContent}>
-            </Inspector>}
+            {inspectorVisibility && <Inspector title={inspectorTitle} width={width} height={height} onClickCloseHandler={onCloseHandler} children={inspetorContent} />}
         </div>
     )
 }

@@ -14,7 +14,7 @@ interface homeStatusProps {
 
 export const useHomeStore = create<homeStatusProps>((set, get) => ({
     inspectorVisibility: false,
-    inspectorSize: {width: 120, height: 160},
+    inspectorSize: {width: 360, height: 420},
     inspetorContent: null,
     inspectorTitle: "Default Inspector",
     setInspectorVisiblity: (visibility: boolean) => {

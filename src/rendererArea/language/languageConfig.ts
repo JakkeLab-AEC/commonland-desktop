@@ -22,8 +22,16 @@ export const displayStringsGlobal: Map<string, LanguageDisplayItem> = new Map([
     ['BoringManager-boringList-en', {componentName: 'BoringEditor', localeCode:'en', itemName:'boringList', displayString: 'Boring List'}],
     
     ['BoringEditor-editorHeader-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'editorHeader', displayString: '시추공 편집'}],
+    
     ['BoringEditor-boringNameHeader-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'boringNameHeader', displayString: '시추공 이름'}],
 
-    ['BoringEditor-boringCoordinate-kr', {componentName: 'BoringEditor', localeCode:'en', itemName:'boringCoordinate', displayString: '좌표'}],
-
+    ['BoringEditor-boringCoordinate-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'boringCoordinate', displayString: '좌표'}],
+    
+    ['BoringEditor-boringLevels-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'boringLevels', displayString: '레벨'}],
+    
+    ['BoringEditor-elevation-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'elevation', displayString: '지반표고'}],
+    
+    ['BoringEditor-undergroundwater-kr', {componentName: 'BoringEditor', localeCode:'kr', itemName:'undergroundwater', displayString: '지하수위'}],
+    
+    ['BoringPreviewer-windowtitle-kr', {componentName: 'BoringPreviewer', localeCode:'kr', itemName:'windowtitle', displayString: '시추공 미리보기'}],
 ]);

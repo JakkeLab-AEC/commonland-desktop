@@ -25,5 +25,9 @@ export default defineConfig((env) => {
     plugins: [pluginHotRestart('reload')],
   };
 
+  console.log('--- preload env ---');
+  console.log(config);
+  console.log('-------------------');
+
   return mergeConfig(getBuildConfig(forgeEnv), config);
 });

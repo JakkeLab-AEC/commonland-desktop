@@ -15,22 +15,21 @@ export const Inspector:React.FC<InspectorProps> = ({children, onClickCloseHandle
             onClickCloseHandler();
         }
     }
-    
+
     return (
-        <div style={{borderRadius: 8, width: width, height: height, backgroundColor:'white', userSelect: 'none'}} className="flex flex-col inspector-body">
-            {/* Header */}
-            <div className="flex flex-row p-2">
+        <div style={{borderRadius: 8, width: width, borderWidth: 1, borderColor: 'silver', height: height, backgroundColor:'white', userSelect: 'none'}} className="flex flex-col h-full inspector-body">
+            <div className='flex flex-row p-2 h-[40px]' style={{borderBottomWidth: 1}}>
+                {/* Header */}
                 <div className="flex-grow">
                     {title}
                 </div>
                 <div className="icon-close" onClick={onClickWrapper} style={{cursor: 'pointer'}}>
-                    <svg viewBox="0 0 20 20" style={{}}>
+                    <svg viewBox="0 0 20 20">
                         <path d="M6 6 L14 14 M14 6 L6 14" />
                     </svg>
                 </div>
             </div>
-            <hr />
-            <div className="h-full">
+            <div className='flex-grow h-full'>
                 {children}
             </div>
         </div>

@@ -24,5 +24,5 @@
 }
 
 .inspector-body {
-    filter: drop-shadow(0px 0px 4px #a2a2a2)
+    filter: drop-shadow(0px 0px 4px #a2a2a2);
 }

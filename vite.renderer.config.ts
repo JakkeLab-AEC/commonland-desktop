@@ -8,7 +8,7 @@ export default defineConfig((env) => {
   const { root, mode, forgeConfigSelf } = forgeEnv;
   const name = forgeConfigSelf.name ?? '';
 
-  return {
+  const config = {
     root,
     mode,
     base: './',
@@ -17,7 +17,8 @@ export default defineConfig((env) => {
       rollupOptions:{
         input: {
           index: './index.html',
-        }
+          boring_previewer: './src/rendererArea/screens/boringPreviewer/boringpreviewer.html'
+        },
       },
     },
     plugins: [pluginExposeRenderer(name)],
@@ -26,4 +27,10 @@ export default defineConfig((env) => {
     },
     clearScreen: false,
   } as UserConfig;
+
+  console.log('--- renderer env ---');
+  console.log(config);
+  console.log('--------------------');
+
+  return config;
 });

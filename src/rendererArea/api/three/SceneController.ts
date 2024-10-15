@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/Addons'
 export class SceneController {
 
     /* Scene Props */
-    private static instance : SceneController;
+    private static defaultInstance : SceneController;
+    private static registeredInstances: Map<string, SceneController> = new Map();
     private scene: THREE.Scene;
     private camera: THREE.Camera;
     private renderer: THREE.Renderer;
@@ -34,16 +35,16 @@ export class SceneController {
     }
 
     public static getInstance(): SceneController {
-        if (!SceneController.instance) {
+        if (!SceneController.defaultInstance) {
             throw new Error("SceneController is not initialized. Call setInstance first.");
         }
-        return SceneController.instance;
+        return SceneController.defaultInstance;
     }
 
     public static setInstance(config: { renderer: THREE.Renderer, scene: THREE.Scene, camera: THREE.Camera, control: OrbitControls }): void {
-        const sceneManger = new SceneController(config);
-        sceneManger.addGridHelper();
-        SceneController.instance = sceneManger;
+        const sceneController = new SceneController(config);
+        sceneController.addGridHelper();
+        SceneController.defaultInstance = sceneController;
     }
 
     public addObject(object: THREE.Object3D): void {
@@ -84,6 +85,21 @@ export class SceneController {
 
     public getScene(): THREE.Scene {
         return this.scene;
+    }
+
+    public static registerInstance(id: string, config: { renderer: THREE.Renderer, scene: THREE.Scene, camera: THREE.Camera, control: OrbitControls }): SceneController {
+        const sceneController = new SceneController(config);
+        sceneController.addGridHelper();
+        SceneController.registeredInstances.set(id, sceneController);
+        return sceneController;
+    }
+
+    public static unregisterInstance(id: string): void {
+        SceneController.registeredInstances.delete(id);
+    }
+
+    public static getRegisteredInstance(id: string): SceneController {
+        return SceneController.registeredInstances.get(id);
     }
 
     // public static serializeCamera(currentCamera: THREE.Camera): ThreeViewJSON | undefined {
@@ -288,7 +304,6 @@ export class SceneController {
         });
     
         renderer.setSize( canvas.width, canvas.height );
-        document.body.appendChild( renderer.domElement );
         return renderer;
     }
 
