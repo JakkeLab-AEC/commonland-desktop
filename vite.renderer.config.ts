@@ -28,9 +28,5 @@ export default defineConfig((env) => {
     clearScreen: false,
   } as UserConfig;
 
-  console.log('--- renderer env ---');
-  console.log(config);
-  console.log('--------------------');
-
   return config;
 });

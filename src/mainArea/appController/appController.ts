@@ -1,5 +1,6 @@
 import { Database } from "sqlite";
 import { UIController } from "./uicontroller/uicontroller";
+import { openDB } from "./repositoryConfig";
 
 export class AppController {
     private static Instance: AppController;
@@ -7,6 +8,10 @@ export class AppController {
     private uiController: UIController;
 
     private constructor() {
+        openDB().then((res) => {
+            this.db = res;
+        });
+        
         this.uiController = new UIController();
     }
 
