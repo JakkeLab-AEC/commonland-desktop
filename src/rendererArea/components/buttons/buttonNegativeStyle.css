@@ -1,0 +1,15 @@
+#btn-negative {
+    background-color: #dadada;
+    height: 48;
+    color: black;
+    align-self: center;
+    font-weight: 600;
+    font-size: 16;
+    border-radius: 4;
+    transition: 0.2s;
+}
+
+#btn-negative:hover {
+    background-color: #dbbaba;
+    transition: 0.2s;
+}

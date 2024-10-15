@@ -7,6 +7,9 @@ declare global {
   const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
   const MAIN_WINDOW_VITE_NAME: string;
 
+  const BORING_PREVIEWER_VITE_DEV_SERVER_URL: string;
+  const BORING_PREVIEWER_VITE_NAME: string;
+
   namespace NodeJS {
     interface Process {
       // Used for hot reload after preload scripts.
