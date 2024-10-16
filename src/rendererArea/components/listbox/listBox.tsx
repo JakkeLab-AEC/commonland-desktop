@@ -5,10 +5,11 @@ interface ListBoxProps {
     height: number;
     items: Map<string, string>;
     header: string,
+    maxLength?: number
     onClickHandler?: (id: string) => void,
 }
 
-export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler}) => {
+export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, maxLength = 16}) => {
     const convertedItems:{key: string, value: string}[] = [];
     if(items && items.size > 0) {
         items.forEach((value, key) => {
@@ -30,7 +31,12 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
         return (
             <div>
                 {convertedItems.map(item => {
-                    return (<ListBoxItem id={item.key} displayText={item.value} onCheckedHandler={onCheckedHandler} onClickItemHandler={onClickWrapper} />)
+                    return (
+                    <ListBoxItem 
+                        id={item.key} 
+                        displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
+                        onCheckedHandler={onCheckedHandler} 
+                        onClickItemHandler={onClickWrapper} />)
                 })}
             </div>
         )

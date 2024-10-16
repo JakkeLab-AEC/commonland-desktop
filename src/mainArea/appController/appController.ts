@@ -1,15 +1,21 @@
 import { Database } from "sqlite";
 import { UIController } from "./uicontroller/uicontroller";
 import { openDB } from "./repositoryConfig";
+import { BoringRepository } from "../repository/boringRepository";
+
+type RepositoryTypes = 'Boring'|'LandInfo'|'Topo'
 
 export class AppController {
     private static Instance: AppController;
     private db:Database;
     private uiController: UIController;
 
+    private boringRepository: BoringRepository;
+
     private constructor() {
         openDB().then((res) => {
             this.db = res;
+            this.boringRepository = new BoringRepository(this.db);
         });
         
         this.uiController = new UIController();
@@ -23,7 +29,11 @@ export class AppController {
         return AppController.Instance;
     }
 
-    getDatabase() {
-        return this.db;
+    getRepository(type: RepositoryTypes) {
+        switch(type) {
+            case 'Boring': {
+                return this.boringRepository;
+            }
+        }
     }
 }

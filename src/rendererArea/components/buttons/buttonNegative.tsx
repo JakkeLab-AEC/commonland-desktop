@@ -1,11 +1,23 @@
 import React from 'react'
 import './buttonNegativeStyle.css'
 
-export default function ButtonNegative({text, width, height, onClickHandler}:{text: string, width?: number|string, height?: number|string, onClickHandler?:(e:React.MouseEvent<HTMLButtonElement>) => void}) {
+interface ButtonNegativeProps {
+    text: string, 
+    isEnabled: boolean,
+    width?: number|string, 
+    height?: number|string, 
+    onClickHandler?:(e:React.MouseEvent<HTMLButtonElement>) => void
+}
+
+export const ButtonNegative:React.FC<ButtonNegativeProps> = ({text, isEnabled, width, height, onClickHandler}) => {
     const buttonHeight = !height ? 24 : height;
 
     return (
-        <button id="btn-negative" onClick={onClickHandler} style={{width: width, borderRadius: 4, height: buttonHeight}}>
+        <button 
+            className={isEnabled ? 'btn-negative-enabled' : 'btn-negative-disabled'} 
+            onClick={isEnabled ? onClickHandler : null} 
+            style={{width: width, borderRadius: 4, height: buttonHeight}} 
+            disabled={!isEnabled}>
             {text}
         </button>
     )

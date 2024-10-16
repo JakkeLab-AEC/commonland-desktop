@@ -13,10 +13,9 @@ export const setIpcWindowControl = (ipcMain: IpcMain) => {
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js'),
             },
-            title: 'hello',
+            alwaysOnTop: true,
         });
         
-
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             window.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/src/rendererArea/screens/boringPreviewer/boringpreviewer.html`);
         } else {

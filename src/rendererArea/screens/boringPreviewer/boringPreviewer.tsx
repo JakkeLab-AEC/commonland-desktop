@@ -1,5 +1,5 @@
 import { SceneController } from "../../../rendererArea/api/three/SceneController";
-import ButtonPositive from "../../../rendererArea/components/buttons/buttonPositive";
+import {ButtonPositive} from "../../../rendererArea/components/buttons/buttonPositive";
 import { useLanguageStore } from "../../../rendererArea/language/languageStore";
 import { useEffect, useRef, useState } from "react";
 
@@ -61,7 +61,7 @@ export const BoringPreviewer: React.FC<BoringPreviewerProp> = ({ boringName }) =
                     시추공 이름 : {boringName}
                 </div>
                 <div>
-                    <ButtonPositive text={isPlaneMode ? '3D 보기' : '평면 보기'} onClickHandler={toggleMode} width={72} />
+                    <ButtonPositive text={isPlaneMode ? '3D 보기' : '평면 보기'} onClickHandler={toggleMode} width={72} isEnabled={true} />
                 </div>
             </div>
             {/* 두 개의 캔버스를 상태에 따라 번갈아가면서 보여주기 */}

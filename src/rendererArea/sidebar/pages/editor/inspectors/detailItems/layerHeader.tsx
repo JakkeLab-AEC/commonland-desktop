@@ -1,5 +1,5 @@
 import React from "react"
-import ButtonPositive from '../../../../../components/buttons/buttonPositive';
+import {ButtonPositive} from '../../../../../components/buttons/buttonPositive';
 
 export const LayerSetHeader = () => {
     return (
@@ -14,7 +14,7 @@ export const LayerSetHeader = () => {
                 층후
             </div>
             <div>
-                <ButtonPositive text={"추가"} width={48}/>
+                <ButtonPositive text={"추가"} width={48} isEnabled={true}/>
             </div>
         </div>
     )

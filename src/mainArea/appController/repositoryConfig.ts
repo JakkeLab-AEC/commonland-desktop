@@ -56,11 +56,14 @@ async function initializeDB(db: Database) {
             boring_id TEXT PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
             location_x NUMERIC NOT NULL,
-            location_y NUMERIC NOT NULL
+            location_y NUMERIC NOT NULL,
+            topo_top NUMERIC NOT NULL,
+            underground_water NUMERIC NOT NULL
         );
 
         CREATE TABLE ${DB_TABLENAMES.LAYERS} (
-            boring_id TEXT PRIMARY KEY,
+            layer_id TEXT PRIMARY KEY,
+            boring_id TEXT NOT NULL,
             layer_index NUMERIC NOT NULL,
             name TEXT NOT NULL,
             thickness NUMERIC NOT NULL,
@@ -69,10 +72,11 @@ async function initializeDB(db: Database) {
         );
 
         CREATE TABLE ${DB_TABLENAMES.SPT_RESULTS} (
-            boring_id TEXT PRIMARY KEY,
+            spt_id TEXT PRIMARY KEY,
+            boring_id TEXT NOT NULL,
             depth NUMERIC NOT NULL,
             hitcount NUMERIC NOT NULL,
-            thickness NUMERIC NOT NULL,
+            distance NUMERIC NOT NULL,
             FOREIGN KEY (boring_id) REFERENCES ${DB_TABLENAMES.BORINGS} ON DELETE CASCADE,
             UNIQUE (boring_id, depth)
         );

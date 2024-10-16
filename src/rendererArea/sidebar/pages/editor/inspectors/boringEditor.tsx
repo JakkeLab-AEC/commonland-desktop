@@ -1,6 +1,6 @@
 import { useLanguageStore } from "../../../../../rendererArea/language/languageStore";
-import ButtonNegative from "../../../../../rendererArea/components/buttons/buttonNegative";
-import ButtonPositive from "../../../../../rendererArea/components/buttons/buttonPositive";
+import { ButtonNegative } from "../../../../../rendererArea/components/buttons/buttonNegative";
+import {ButtonPositive} from "../../../../../rendererArea/components/buttons/buttonPositive";
 import { useRef } from "react";
 import { FoldableControl } from "../../../../../rendererArea/components/foldableControl/foldableControl";
 import React from "react";
@@ -73,8 +73,8 @@ export const BoringEditor: React.FC = () => {
             {/* Save buttons */}
             <div className="flex self-end">
                 <div className="flex flex-row gap-2 justify-end p-2">
-                    <ButtonPositive text={"저장"} width={48} />
-                    <ButtonNegative text={"취소"} width={48} />
+                    <ButtonPositive text={"저장"} width={48} isEnabled={true} />
+                    <ButtonNegative text={"취소"} width={48} isEnabled={true} />
                 </div>
             </div>
         </div>

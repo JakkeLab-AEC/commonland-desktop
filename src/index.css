@@ -8,9 +8,9 @@ body {
 
 .key-color-main {
   /* Background : Blue */
-  background-color: #0045FB;
+  background-color: #9eff91;
   /* Text : White */
-  color: white
+  color: rgb(0, 0, 0)
 }
 
 .main-header{

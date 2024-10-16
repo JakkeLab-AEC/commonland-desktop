@@ -1,20 +1,14 @@
 import { useHomeStore } from "../../../../rendererArea/homeStatus/homeStatusModel";
 import { ListBox } from "../../../../rendererArea/components/listbox/listBox"
 import { ListBoxItem } from "../../../../rendererArea/components/listbox/listBoxItem"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { BoringEditor } from "./inspectors/boringEditor";
 import { useLanguageStore } from "../../../../rendererArea/language/languageStore";
-
-const boreHoles = (n: number) => {
-    const items: [string, string][] = []; // 튜플 배열로 타입 명시
-    for(let i = 1; i <= n; i++) {
-        const numbering = String(i).padStart(2, '0');
-        items.push([`${i}`, `BH-${numbering}`]);
-    }
-    return items;
-}
-
-const sampleItems: Map<string, string> = new Map(boreHoles(15));
+import {ButtonPositive} from "../../../../rendererArea/components/buttons/buttonPositive";
+import {ButtonNegative} from "../../../../rendererArea/components/buttons/buttonNegative";
+import { useEditorPageStore } from "./EditorPageStore";
+import { Boring } from "../../../../mainArea/models/serviceModels/boring/boring";
+import { generateUUID } from "three/src/math/MathUtils";
 
 interface InspectorContent {
     id: string
@@ -36,25 +30,64 @@ export const BoringManager = () => {
         setInspectorSize
     } = useHomeStore();
 
+    const {
+        fetchBorings,
+        insertBoring,
+        selectBoring,
+        borings,
+    } = useEditorPageStore();
+
+    const [boringDisplayItems, setBoringDisplayItems] = useState<Map<string, string>>(new Map());
+
     const onClickHandler = (id: string) => {
-        setInspectorContent(<InspectorContent id={id}/>)
-        setInspectorTitle(`${findValue('BoringEditor', 'editorHeader')} : ${sampleItems.get(id)}`);
+        const selectedBoring = selectBoring(id);
+        setInspectorContent(<InspectorContent id={selectedBoring.getId().getValue()}/>)
+
+        const boringName = selectedBoring.getName();
+        setInspectorTitle(`${findValue('BoringEditor', 'editorHeader')} : ${boringName.length > 16 ? boringName.substring(0, 15)+'...' : boringName}`);
         setInspectorSize({width: 440, height: 600})
         setInspectorVisiblity(true);
     }
 
+    const onClickAddBoring = async () => {
+        const newBoring = new Boring(generateUUID(), {x: 0, y: 0}, 0, 0);
+        await window.electronBoringDataAPI.insertBoring(newBoring.serialize());
+        await fetchBorings();
+        wrapBoringDisplayData();
+    }
+
+    const wrapBoringDisplayData = () => {
+        const boringsMap:Map<string, string> = new Map();
+        console.log(borings);
+        borings.forEach(boring => {
+            boringsMap.set(boring.getId().getValue(), boring.getName());
+        });
+
+        console.log(boringsMap);
+        setBoringDisplayItems(boringsMap);
+    }
+
     useEffect(() => {
-        onClickHandler('1');
+        const fetchAndWrapData = async () => {
+            await fetchBorings();  // 상태 업데이트
+            wrapBoringDisplayData();  // 상태 업데이트 후 데이터 반영
+        };
+        
+        fetchAndWrapData();
     }, []);
     
 
     return (
         <div className="flex flex-col">
-            <div className="mb-1" style={{userSelect:'none'}}>
-                {findValue('BoringManager', 'boringList')}
+            <div className="flex flex-row mb-1 gap-1" style={{userSelect:'none'}}>
+                <div className="flex-grow">
+                    {findValue('BoringManager', 'boringList')}
+                </div>
+                <ButtonPositive text={"추가"} width={40} isEnabled={true} onClickHandler={onClickAddBoring}/>
+                <ButtonNegative text={"삭제"} width={40} isEnabled={true} />
             </div>
             <div>
-                <ListBox height={460} items={sampleItems} onClickHandler={onClickHandler} header={findValue('BoringManager', 'boringList')}/>
+                <ListBox height={460} items={boringDisplayItems} onClickHandler={onClickHandler} header={findValue('BoringManager', 'boringList')}/>
             </div>
         </div>
     )

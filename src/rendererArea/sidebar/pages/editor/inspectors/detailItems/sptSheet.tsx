@@ -1,6 +1,6 @@
 import React, { useState } from "react"
-import ButtonPositive from "../../../../../components/buttons/buttonPositive";
-import { ContextMenu, ContextMenuItemProp, ContextMenuProp } from "../../../../../components/contextmenu/contextMenu";
+import {ButtonPositive} from "../../../../../components/buttons/buttonPositive";
+import { ContextMenu, ContextMenuItemProp } from "../../../../../components/contextmenu/contextMenu";
 
 interface SPTResultProp {
     depth: number,
@@ -90,7 +90,7 @@ export const SPTSheet = () => {
             <div className="flex items-center p-2 border-b">
                 <div className="w-1/4 font-semibold">심도</div>
                 <div className="flex-grow font-semibold">N치</div>
-                <ButtonPositive text={"..."} width={32} onClickHandler={showContextMenu}/>
+                <ButtonPositive text={"..."} width={32} onClickHandler={showContextMenu} isEnabled={true}/>
             </div>
             <div className="flex flex-grow" style={{overflowY: 'auto'}}>
                 <SPTResults results={sampleSPTResults} />
