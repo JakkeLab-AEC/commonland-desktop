@@ -10,7 +10,6 @@ export const setIpcBoringRepository = (ipcMain: IpcMain) => {
 
     ipcMain.handle('boring-repository-fetch-all', async(_) => {
         const fetchJob = await AppController.getInstance().getRepository('Boring').fetchAllBorings();
-        console.log(fetchJob);
         return fetchJob;
     });
 }

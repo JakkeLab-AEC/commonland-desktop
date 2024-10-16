@@ -1,6 +1,4 @@
 import { BoringDTO } from "../../../../dto/serviceModel/BoringDTO";
-import { ElementId } from "../../id";
-import { ModelType } from "../../modelType";
 import { ServiceModel } from "../servicemodel";
 import { Layer } from "./layer";
 import { SPTResult } from "./sptResult";
@@ -27,6 +25,13 @@ export class Boring extends ServiceModel {
             throw new Error('There is no layer of this boring.')
         } else {
             this.layers = this.layers.splice(index, 1);
+        }
+    }
+
+    removeLayer(id: string) {
+        const index = this.layers.findIndex(layer => layer.elementId.getValue() == id);
+        if(index != -1) {
+            this.layers.splice(index, 1);
         }
     }
 
@@ -59,6 +64,26 @@ export class Boring extends ServiceModel {
         return this.elementId;
     }
 
+    getLocation() {
+        return this.location;
+    }
+
+    getTopoTop() {
+        return this.topoTop;
+    }
+
+    getUndergroundWater() {
+        return this.undergroundWater;
+    }
+
+    getLayers() {
+        return this.layers;
+    }
+
+    getSPTResult() {
+        return this.sptResult;
+    }
+
     static deserialize(dto: BoringDTO):Boring {
         const boring = new Boring(dto.name, dto.location, dto.topoTop, dto.undergroundWater, dto.id);
         const orderedLayers = dto.layers.sort((a, b) => a.layerIndex - b.layerIndex);
@@ -72,6 +97,30 @@ export class Boring extends ServiceModel {
         })
         
         return boring;
+    }
+
+    clone(): Boring {
+        // New boring instnace
+        const clonedBoring = new Boring(
+            this.name, 
+            { ...this.location },  // copy
+            this.topoTop, 
+            this.undergroundWater, 
+            this.elementId.getValue()
+        );
+
+        // Copy layers
+        clonedBoring.layers = this.layers.map(layer => new Layer(layer.getName(), layer.getThickness(), layer.elementId.getValue()));
+
+        // Copy spt results
+        const sptResultsCopy = new SPTResult();
+        const orderedSpts = this.sptResult.getAllResults();
+        orderedSpts.forEach(spt => {
+            sptResultsCopy.registerResult(spt.depth, {hitCount: spt.hitCount, distance: spt.distance});
+        });
+        clonedBoring.sptResult = sptResultsCopy;
+
+        return clonedBoring;
     }
 
     constructor(

@@ -12,8 +12,9 @@ export class SPTResult extends ServiceModel {
     }
 
     buildEmptySets(totalDepth: number) {
-        for(let i = 1; i <= totalDepth; i += 0.5){
-            this.results.set(i, {hitCount: 0, distance: 0});
+        this.results = new Map();
+        for(let i = 1; i <= totalDepth; i++){
+            this.results.set(i, {hitCount: 1, distance: 1});
         }
     }
     

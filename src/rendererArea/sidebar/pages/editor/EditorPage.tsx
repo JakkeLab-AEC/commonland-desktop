@@ -11,11 +11,11 @@ import { Boring } from "../../../../mainArea/models/serviceModels/boring/boring"
 import { generateUUID } from "three/src/math/MathUtils";
 
 interface InspectorContent {
-    id: string
+    boring: Boring
 }
 
-const InspectorContent:React.FC<InspectorContent> = () => {
-    return (<BoringEditor />)
+const InspectorContent:React.FC<InspectorContent> = ({boring}) => {
+    return (<BoringEditor boring={boring.clone()}/>)
 }
 
 export const BoringManager = () => {
@@ -31,17 +31,16 @@ export const BoringManager = () => {
     } = useHomeStore();
 
     const {
-        fetchBorings,
+        fetchAllBorings,
         insertBoring,
         selectBoring,
         borings,
+        boringDisplayItems,
     } = useEditorPageStore();
-
-    const [boringDisplayItems, setBoringDisplayItems] = useState<Map<string, string>>(new Map());
 
     const onClickHandler = (id: string) => {
         const selectedBoring = selectBoring(id);
-        setInspectorContent(<InspectorContent id={selectedBoring.getId().getValue()}/>)
+        setInspectorContent(<InspectorContent key={selectedBoring.getId().getValue()} boring={selectedBoring}/>)
 
         const boringName = selectedBoring.getName();
         setInspectorTitle(`${findValue('BoringEditor', 'editorHeader')} : ${boringName.length > 16 ? boringName.substring(0, 15)+'...' : boringName}`);
@@ -51,30 +50,28 @@ export const BoringManager = () => {
 
     const onClickAddBoring = async () => {
         const newBoring = new Boring(generateUUID(), {x: 0, y: 0}, 0, 0);
-        await window.electronBoringDataAPI.insertBoring(newBoring.serialize());
-        await fetchBorings();
-        wrapBoringDisplayData();
-    }
+      
+        // Insert new boring
+        await insertBoring(newBoring);
+      
+        // Fetch updated borings
+        await fetchAllBorings();
+      
+        // Re-wrap the display data after fetching updated borings
+        await wrapBoringDisplayData(borings);
+      };
 
-    const wrapBoringDisplayData = () => {
+    const wrapBoringDisplayData = async (borings: Map<string, Boring>) => {
         const boringsMap:Map<string, string> = new Map();
         console.log(borings);
         borings.forEach(boring => {
             boringsMap.set(boring.getId().getValue(), boring.getName());
         });
-
-        console.log(boringsMap);
-        setBoringDisplayItems(boringsMap);
     }
 
     useEffect(() => {
-        const fetchAndWrapData = async () => {
-            await fetchBorings();  // 상태 업데이트
-            wrapBoringDisplayData();  // 상태 업데이트 후 데이터 반영
-        };
-        
-        fetchAndWrapData();
-    }, []);
+        fetchAllBorings();
+    }, [fetchAllBorings]);
     
 
     return (

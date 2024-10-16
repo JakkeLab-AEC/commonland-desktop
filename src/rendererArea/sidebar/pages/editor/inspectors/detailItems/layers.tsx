@@ -1,23 +1,28 @@
 import React from "react";
-import { Layer } from "./layer";
+import { LayerComponent } from "./layer";
 import { LayerSetHeader } from "./layerHeader";
+import { Layer } from "../../../../../../mainArea/models/serviceModels/boring/layer";
 
 interface LayerSetProps {
-    layers: {id: string, name: string, thickness: number}[],
+    layers: Layer[]
+    onCreate: () => void;
+    onDelete: (id: string) => void;
 }
 
-export const LayerSet:React.FC<LayerSetProps> = ({layers}) => {
+export const LayerSet:React.FC<LayerSetProps> = ({layers, onDelete, onCreate}) => {
     const LayerComponents = layers.map(layer => {
         return(
-            <Layer layerId={layer.id} layerName={layer.name} thickness={layer.thickness} />
+            <LayerComponent layerId={layer.elementId.getValue()} layerName={layer.getName()} thickness={layer.getThickness()} onDelete={onDelete}/>
         )
     });
 
     return (
-        <div>
-            <LayerSetHeader />
+        <div className="h-full">
+            <LayerSetHeader onCreate={onCreate}/>
             <hr/>
-            {LayerComponents}
+            <div className="flex flex-col h-full gap-1" style={{overflowY: 'auto'}}>
+                {LayerComponents}
+            </div>
         </div>
     )
 }

@@ -5,11 +5,13 @@ import { ButtonDelete } from "../../../../../components/buttons/buttonDelete";
 
 export interface LayerProps {
     layerId: string;
-    layerName: string;
-    thickness: number;
+    layerName?: string;
+    thickness?: number;
+    onDelete: (id: string) => void;
 }
 
-export const Layer: React.FC<LayerProps> = ({ layerId, layerName }) => {
+export const LayerComponent: React.FC<LayerProps> = ({ layerId, layerName, thickness=0.01, onDelete }) => {
+
     return (
       <div className="flex flex-row space-x-2 h-[32px] items-center">
         <div className="flex w-[32px]">
@@ -25,12 +27,12 @@ export const Layer: React.FC<LayerProps> = ({ layerId, layerName }) => {
           <input
             className="border w-full"
             type='number'
-            defaultValue={0.01}
+            defaultValue={thickness}
             step={0.01}
           />
         </div>
         <div>
-            <ButtonDelete id={layerId} />
+            <ButtonDelete id={layerId} onDeleteHandler={onDelete}/>
         </div>
       </div>
     );

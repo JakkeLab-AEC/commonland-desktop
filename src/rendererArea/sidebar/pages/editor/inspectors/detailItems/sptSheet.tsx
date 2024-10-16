@@ -1,18 +1,21 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import {ButtonPositive} from "../../../../../components/buttons/buttonPositive";
 import { ContextMenu, ContextMenuItemProp } from "../../../../../components/contextmenu/contextMenu";
+import { SPTResult } from "../../../../../../mainArea/models/serviceModels/boring/sptResult";
+import { Inspector } from "../../../../../../rendererArea/components/inspector/inspector";
+import { ButtonNegative } from "../../../../../../rendererArea/components/buttons/buttonNegative";
 
-interface SPTResultProp {
+interface SPTResultUnitProp {
     depth: number,
     hitCount: number,
     distance: number
 }
 
-export const SPTResult:React.FC<SPTResultProp> = ({depth, hitCount, distance}) => {
+export const SPTResultUnit:React.FC<SPTResultUnitProp> = ({depth, hitCount, distance}) => {
     return(
         <div className="flex flex-row">
             <div className="w-[48px]">
-                {depth}
+                {depth.toFixed(1)}
             </div>
             <div className="flex-1 flex flex-row gap-1">
                 <div className="w-[36px]">
@@ -28,45 +31,29 @@ export const SPTResult:React.FC<SPTResultProp> = ({depth, hitCount, distance}) =
 }
 
 interface SPTResultSetProp {
-    results: SPTResultProp[];
+    result: SPTResult;
 }
 
 
-const SPTResults: React.FC<SPTResultSetProp> = ({ results }) => (
+const SPTResults: React.FC<SPTResultSetProp> = ({ result }) => (
     <div className="flex flex-col gap-2 p-2 h-[300px]">
-        {results.map((spt, index) => (
-            <SPTResult key={index} depth={spt.depth} hitCount={spt.hitCount} distance={spt.distance} />
+        {result.getAllResults().map((spt, index) => (
+            <SPTResultUnit key={index} depth={spt.depth} hitCount={spt.hitCount} distance={spt.distance} />
         ))}
     </div>
 );
 
-const sampleSPTResults:SPTResultProp[] = [
-    {depth: 1.0, hitCount: 2, distance: 30},
-    {depth: 2.0, hitCount: 2, distance: 30},
-    {depth: 3.0, hitCount: 2, distance: 30},
-    {depth: 4.0, hitCount: 2, distance: 30},
-    {depth: 5.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-    {depth: 6.0, hitCount: 2, distance: 30},
-];
+interface SPTSheetProps {
+    SPTResultValues: SPTResult
+    onClickSetDepth?: (e: number) => void;
+}
 
-export const SPTSheet = () => {
-    const[contextMenuVisibility, toggleContextMenu] = useState<boolean>(false);
+
+
+export const SPTSheet:React.FC<SPTSheetProps> = ({SPTResultValues, onClickSetDepth}) => {
+    const [contextMenuVisibility, toggleContextMenu] = useState<boolean>(false);
+    const [sptSettingVisibility, setSptSettingVisibility] = useState<boolean>(false);
+    const depthRef = useRef<HTMLInputElement>(null);
 
     const showContextMenu = () => {
         toggleContextMenu(!contextMenuVisibility);
@@ -80,8 +67,51 @@ export const SPTSheet = () => {
         window.electronWindowControlAPI.createNewWindow();
     }
 
+    const SPTRangeWindow = () => {
+        return (
+        <div style={{position: 'absolute', left: 452}}>
+            <Inspector title={"SPT 범위설정"} width={160} height={116} onClickCloseHandler={closeSPTRangeWindow}>
+                <div className="flex flex-col p-2 gap-2">
+                    <div className="flex flex-row gap-2">
+                        <div className="flex w-[48px] flex-grow">
+                            깊이
+                        </div>
+                        <div className="flex">
+                            <input
+                                className="border w-[92px]"
+                                type='number'
+                                defaultValue={1}
+                                min={1}
+                                ref={depthRef} />
+                        </div>
+                    </div>
+                    <div className="flex gap-2 self-end">
+                        <ButtonPositive text={"설정"} isEnabled={true} width={32} onClickHandler={onClickSubmitRange}/>
+                        <ButtonNegative text={"취소"} isEnabled={true} width={32} onClickHandler={closeSPTRangeWindow}/>
+                    </div>
+                </div>
+            </Inspector>
+        </div>
+    )}
+
+    const openSPTRangeWindow = () => {
+        setSptSettingVisibility(true);
+    }
+
+    const closeSPTRangeWindow = () => {
+        setSptSettingVisibility(false);
+    }
+
+    const onClickSubmitRange = () => {
+        if(onClickSetDepth && depthRef.current) {
+            onClickSetDepth(parseFloat(depthRef.current.value));
+        }
+
+        closeSPTRangeWindow();
+    }
+
     const contextMenuItemProps:ContextMenuItemProp[] = [
-        {displayString: '깊이설정', isActionIdBased: false, closeHandler: closeContextMenu},
+        {displayString: '깊이설정', isActionIdBased: false, closeHandler: closeContextMenu, action: openSPTRangeWindow},
         {displayString: '미리보기', isActionIdBased: false, closeHandler: closeContextMenu, action: openPreviewWindow},
     ];
 
@@ -93,12 +123,13 @@ export const SPTSheet = () => {
                 <ButtonPositive text={"..."} width={32} onClickHandler={showContextMenu} isEnabled={true}/>
             </div>
             <div className="flex flex-grow" style={{overflowY: 'auto'}}>
-                <SPTResults results={sampleSPTResults} />
+                <SPTResults result={SPTResultValues} />
             </div>
             {contextMenuVisibility && 
             <div style={{top: 44, right: 60, position: 'absolute'}}>
                 <ContextMenu menuItemProps={contextMenuItemProps} width={120} onClose={closeContextMenu}/>
             </div>}
+            {sptSettingVisibility && <SPTRangeWindow />}
         </div>
     );
 }

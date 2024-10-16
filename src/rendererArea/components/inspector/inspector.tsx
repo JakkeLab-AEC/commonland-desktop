@@ -29,7 +29,7 @@ export const Inspector:React.FC<InspectorProps> = ({children, onClickCloseHandle
                     </svg>
                 </div>
             </div>
-            <div className='flex-grow h-full'>
+            <div className='flex-grow w-full h-full'>
                 {children}
             </div>
         </div>

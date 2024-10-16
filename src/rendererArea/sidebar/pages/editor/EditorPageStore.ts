@@ -3,7 +3,8 @@ import { create } from "zustand";
 
 interface EditorPageStore {
     borings: Map<string, Boring>;
-    fetchBorings:() => void;
+    boringDisplayItems: Map<string, string>;
+    fetchAllBorings:() => Promise<void>;
     createNewBoring: () => void;
     insertBoring: (boring: Boring) => void;
     updateBoring: (id: string, boring: Boring) => void;
@@ -13,17 +14,26 @@ interface EditorPageStore {
 
 export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
     borings: new Map(),
-    fetchBorings: async () => {
+    boringDisplayItems: new Map(),
+    fetchAllBorings: async () => {
         const fetchJob = await window.electronBoringDataAPI.fetchAllBorings();
         if(fetchJob.result) {
-            const borings:[string, Boring][] = fetchJob.fetchedBorings.map(boring => {
+            const borings:[string, Boring][] = [];
+            const boringDisplayItems:[string, string][] = [];
+            fetchJob.fetchedBorings.forEach(boring => {
                 const targetBoring = Boring.deserialize(boring);
-                return [targetBoring.getId().getValue(), targetBoring]
+                borings.push([targetBoring.getId().getValue(), targetBoring]);
+                boringDisplayItems.push([targetBoring.getId().getValue(), targetBoring.getName()]);
             });
 
-            const newBorings:Map<string, Boring> = new Map(borings);
-
-            set(() => { return {borings: newBorings}});
+            const newBorings: Map<string, Boring> = new Map(borings);
+            const newBoringDisplayItems: Map<string, string> = new Map(boringDisplayItems);
+            set(() => { 
+                return {
+                    borings: newBorings,
+                    boringDisplayItems: newBoringDisplayItems
+                }
+            });
         }
     },
     createNewBoring: () => {
