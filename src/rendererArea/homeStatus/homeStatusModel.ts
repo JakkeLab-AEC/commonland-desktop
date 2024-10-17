@@ -6,10 +6,12 @@ interface homeStatusProps {
     inspectorSize: {width: number, height: number},
     inspetorContent: ReactNode;
     inspectorTitle: string,
+    inspectorClosingListeners: Array<() => void>,
     setInspectorTitle: (title: string) => void,
     setInspectorVisiblity: (visiblity: boolean) => void,
     setInspectorSize: (option: {width: number, height: number}) => void,
     setInspectorContent: (content: ReactNode) => void,
+    registerInspectorClosingListner: (listener: () => void) => void,
 }
 
 export const useHomeStore = create<homeStatusProps>((set, get) => ({
@@ -17,9 +19,18 @@ export const useHomeStore = create<homeStatusProps>((set, get) => ({
     inspectorSize: {width: 360, height: 420},
     inspetorContent: null,
     inspectorTitle: "Default Inspector",
+    inspectorClosingListeners: [],
     setInspectorVisiblity: (visibility: boolean) => {
+        const listeners = get().inspectorClosingListeners;
+        if(!visibility) {
+            listeners.forEach(listener => listener());
+        }
+
         set(() => {
-            return {inspectorVisibility: visibility}
+            return {
+                inspectorVisibility: visibility,
+                inspectorClosingListeners: [],
+            }
         })
     },
     setInspectorSize: (option: {width: number, height: number}) => {
@@ -36,6 +47,16 @@ export const useHomeStore = create<homeStatusProps>((set, get) => ({
     setInspectorContent: (content: ReactNode) => {
         set(() => {
             return {inspetorContent: content}
+        })
+    },
+    registerInspectorClosingListner: (listener: () => void) => {
+        const listeners = [...get().inspectorClosingListeners];
+        listeners.push(listener);
+
+        set(() => {
+            return {
+                inspectorClosingListeners: listeners
+            }
         })
     }
 }));

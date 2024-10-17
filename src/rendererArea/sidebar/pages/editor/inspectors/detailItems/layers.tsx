@@ -7,12 +7,18 @@ interface LayerSetProps {
     layers: Layer[]
     onCreate: () => void;
     onDelete: (id: string) => void;
+    onChangeValueListner: (id: string, name: string, thickness: number) => void;
 }
 
-export const LayerSet:React.FC<LayerSetProps> = ({layers, onDelete, onCreate}) => {
+export const LayerSet:React.FC<LayerSetProps> = ({layers, onDelete, onCreate, onChangeValueListner}) => {
     const LayerComponents = layers.map(layer => {
         return(
-            <LayerComponent layerId={layer.elementId.getValue()} layerName={layer.getName()} thickness={layer.getThickness()} onDelete={onDelete}/>
+            <LayerComponent 
+                layerId={layer.elementId.getValue()} 
+                layerName={layer.getName()} 
+                thickness={layer.getThickness()} 
+                onDelete={onDelete}
+                onChangeValueListener={onChangeValueListner}/>
         )
     });
 

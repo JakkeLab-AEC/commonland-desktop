@@ -23,7 +23,7 @@ export const ListBoxItem:React.FC<ListBoxItemProps> = ({id, displayText, onCheck
     
     
     return (
-        <div className="flex flex-row gap-2 h-[32px] items-center">
+        <div className="flex flex-row gap-2 h-[32px] items-center" key={id}>
             <div>
                 <input 
                     type='checkbox'

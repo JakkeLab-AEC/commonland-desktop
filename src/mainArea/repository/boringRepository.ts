@@ -7,6 +7,8 @@ import { ModelType } from "../models/modelType";
 interface BoringCRUDMethods {
     insertBoring(boringDto: BoringDTO): Promise<{ result: boolean, message?: string }>;
     fetchAllBorings(): Promise<{ result: boolean, message?: string, boringDatas?: BoringDTO }>;
+    updateBoring(boringDto: BoringDTO): Promise<{ result: boolean, message?: string}>;
+    removeBoring(ids: string[]): Promise<{result: boolean, message?: string}>;
 }
 
 interface BoringData {
@@ -30,7 +32,7 @@ interface SptResultData {
     spt_id: string;
     boring_id: string;
     depth: number;
-    hitCount: number;
+    hitcount: number;
     distance: number;
 }
 
@@ -50,7 +52,7 @@ export class BoringRepository implements BoringCRUDMethods {
             // Pre-defined props
             const boringColumns = ['boring_id', 'name', 'location_x', 'location_y', 'topo_top', 'underground_water'];
             const layerColumns = ['layer_id', 'boring_id', 'layer_index', 'name', 'thickness'];
-            const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitCount', 'distance'];
+            const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitcount', 'distance'];
             
             const propsLayer = [
                 ...boringColumns.map(col => `br.${col}`), 
@@ -141,7 +143,7 @@ export class BoringRepository implements BoringCRUDMethods {
                         return {
                             id: spt.spt_id,
                             depth: spt.depth,
-                            hitCount: spt.hitCount,
+                            hitCount: spt.hitcount,
                             distance: spt.distance,
                         }
                     });
@@ -210,12 +212,16 @@ export class BoringRepository implements BoringCRUDMethods {
             // Insert all datas
             await this.db.all(boringInsertQuery, boringParams);
 
-            if(layerParams.length > 0){
-                await this.db.all(layerInsertQuery, layerParams);
+            if(layerParams.length > 0) {
+                for(const layerParam of layerParams) {
+                    await this.db.all(layerInsertQuery, layerParam);
+                }
             }
 
-            if(sptResultParams.length > 0){
-                await this.db.all(sptResultInsertQuery, sptResultParams);
+            if(sptResultParams.length > 0) {
+                for(const sptResultParam of sptResultParams) {
+                    await this.db.all(sptResultInsertQuery, sptResultParam);
+                }
             }
 
             // COMMIT
@@ -227,6 +233,136 @@ export class BoringRepository implements BoringCRUDMethods {
             await this.db.exec('ROLLBACK');
             console.log(error);
             return {result: false, message: error}
+        }
+    }
+
+    async updateBoring(boringDto: BoringDTO): Promise<{result: boolean, message?: string}> {
+        const boringColumns = ['name', 'location_x', 'location_y', 'topo_top', 'underground_water'];
+        const {name, location, topoTop, undergroundWater} = boringDto;
+
+        const layerColumns = ['layer_id', 'boring_id', 'layer_index', 'name', 'thickness'];
+        const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitCount', 'distance'];
+
+        const queryBoring = RepositryQueryBuilder.buildUpdateQuery(DB_TABLENAMES.BORINGS, boringColumns, 'boring_id');
+        
+        const layerInsertQuery = RepositryQueryBuilder.buildInsertQuery(DB_TABLENAMES.LAYERS, layerColumns);
+        const layerParams = boringDto.layers.map(layer => {
+            return [
+                layer.id,
+                boringDto.id,
+                layer.layerIndex,
+                layer.name,
+                layer.thickness
+            ];
+        })
+
+        const sptResultInsertQuery = RepositryQueryBuilder.buildInsertQuery(DB_TABLENAMES.SPT_RESULTS, sptResultColumns);
+        const sptResultParams = boringDto.sptResults.map(spt => {
+            return [
+                spt.id,
+                boringDto.id,
+                spt.depth,
+                spt.hitCount,
+                spt.distance
+            ];
+        })
+
+        try {
+            await this.db.exec('BEGIN TRANSACTION');
+
+            // Update boring data
+            await this.db.all(queryBoring, [name, location.x, location.y, topoTop, undergroundWater]);
+            
+            // Update layer data
+            const layerDeleteQuery = `
+                DELETE FROM ${DB_TABLENAMES.LAYERS} WHERE boring_id = ?
+            `;
+
+            await this.db.all(layerDeleteQuery, boringDto.id);
+            
+            if(layerParams.length > 0) {
+                for(const layerParam of layerParams) {
+                    await this.db.all(layerInsertQuery, layerParam);
+                }
+            }
+            
+            // Update SPT Data
+            const sptDeleteQuery = `
+                DELETE FROM ${DB_TABLENAMES.SPT_RESULTS} WHERE boring_id = ?
+            `
+
+            await this.db.all(sptDeleteQuery, boringDto.id);
+
+            if(sptResultParams.length > 0) {
+                for(const sptResultParam of sptResultParams) {
+                    await this.db.all(sptResultInsertQuery, sptResultParam);
+                }
+            }
+
+            await this.db.exec('COMMIT');
+
+            return {result: true}
+        } catch (error) {
+            await this.db.exec('ROLLBACK');
+            console.log(error);
+            return {result: false, message: error}
+        }
+    }
+
+    async removeBoring(ids: string[]): Promise<{result: boolean, message?: string}> {
+        const query = `
+            DELETE FROM ${DB_TABLENAMES.BORINGS} WHERE boring_id = ?
+        `;
+        
+        try {
+            await this.db.exec('BEGIN TRANSACTION');
+            
+            for(const id of ids) {
+                await this.db.all(query, id);
+            }
+            
+            await this.db.exec('COMMIT');
+
+            return {
+                result: true
+            }
+        } catch (error) {
+            await this.db.exec('ROLLBACK');
+            console.log(error)
+            return {
+                result: false,
+                message: error
+            }
+        }
+    }
+
+    async searchBoringNames(prefix: string, index:number): Promise<{result: boolean, message?: string, searchedNames?: string[]}> {
+        try {
+            const query = `
+                SELECT
+                    name
+                FROM
+                    ${DB_TABLENAMES.BORINGS}
+                WHERE
+                    name LIKE '${prefix}-%'
+                    AND CAST(SUBSTR(name, LENGTH('${prefix}-') + 1) AS INTEGER) >= ${index}
+                ORDER BY
+                    CAST(SUBSTR(name, LENGTH('${prefix}-') + 1) AS INTEGER) ASC
+            `;
+
+            const result = await this.db.all(query);
+            if (result && result.length > 0) {
+                const searchedNames = result.map((row: { name: string }) => row.name);
+                return { result: true, searchedNames };
+            } else {
+                return { result: false, message: `No names found with index greater than ${index}`, searchedNames: []};
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                result: false,
+                message: error.message
+            };
         }
     }
 }

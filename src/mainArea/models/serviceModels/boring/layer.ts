@@ -1,6 +1,3 @@
-import { ElementId } from "../../id";
-import { IModelBase } from "../../iModelBase";
-import { ModelType } from "../../modelType";
 import { ServiceModel } from "../servicemodel";
 
 export class Layer extends ServiceModel {
@@ -14,6 +11,14 @@ export class Layer extends ServiceModel {
 
     getThickness() {
         return this.thickness;
+    }
+
+    setName(name: string) {
+        this.name = name;
+    }
+
+    setThickness(thickness: number) {
+        this.thickness = thickness;
     }
 
     constructor(name: string, thickness: number, key?: string) {

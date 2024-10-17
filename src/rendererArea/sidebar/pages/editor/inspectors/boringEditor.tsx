@@ -9,7 +9,8 @@ import { SPTSheet } from "./detailItems/sptSheet";
 import { Boring } from "../../../../../mainArea/models/serviceModels/boring/boring";
 import { useHomeStore } from "../../../../../rendererArea/homeStatus/homeStatusModel";
 import { Layer } from "../../../../../mainArea/models/serviceModels/boring/layer";
-import { SPTResult } from "../../../../../mainArea/models/serviceModels/boring/sptResult";
+import { SPTResult, SPTResultSet } from "../../../../../mainArea/models/serviceModels/boring/sptResult";
+import { useEditorPageStore } from "../EditorPageStore";
 
 interface BoringEditorProps {
     boring: Boring
@@ -18,17 +19,20 @@ interface BoringEditorProps {
 export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
     const { findValue } = useLanguageStore();
     const {setInspectorVisiblity} = useHomeStore();
+    const {
+        updateBoring
+    } = useEditorPageStore();
 
     const [currentLayers, setLayers] = useState<Layer[]>(boring.getLayers());
-    const [currentSPTResult, setSPTResult] = useState<SPTResult>(boring.getSPTResult());
+    const [currentSPTResult] = useState<SPTResultSet>(boring.getSPTResultSet());
     const tbBoringName = useRef(null);
     
     const onClickCancel = () => {
         setInspectorVisiblity(false);
     }
 
-    const onClickSave = () => {
-        
+    const onClickSave = async () => {
+        const updateJob = updateBoring(boring);
     }
 
     const onDeleteLayer = (id: string) => {
@@ -43,7 +47,15 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
     }
 
     const onClickSetSPTDepth = (depth: number) => {
-        boring.getSPTResult().buildEmptySets(depth);
+        boring.getSPTResultSet().buildEmptySets(depth);
+    }
+
+    const onChangeSPTValueHandler = (id: string, depth: number, hitCount: number, distance: number) => {
+        boring.getSPTResultSet().updateResult(depth, new SPTResult(depth, hitCount, distance));
+    }
+
+    const onChangeLayerValueHandler = (id: string, name: string, thickness: number) => {
+        boring.updateLayer(id, name, thickness);
     }
 
     return (
@@ -87,11 +99,15 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
                     <hr />
                     {/* Layers */}
                     <div className="p-2 h-[320px]">
-                        <LayerSet layers={currentLayers} onDelete={onDeleteLayer} onCreate={onCreateLayer}/>
+                        <LayerSet 
+                            layers={currentLayers} 
+                            onDelete={onDeleteLayer} 
+                            onCreate={onCreateLayer}
+                            onChangeValueListner={onChangeLayerValueHandler}/>
                     </div>
                 </div>
                 <div className="flex flex-grow">
-                    <SPTSheet SPTResultValues={currentSPTResult} onClickSetDepth={onClickSetSPTDepth}/>
+                    <SPTSheet onClickSetDepth={onClickSetSPTDepth} onChangeValueSetListner={onChangeSPTValueHandler} SPTResultSet={currentSPTResult}/>
                 </div>
             </div>
 

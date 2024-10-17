@@ -1,7 +1,7 @@
 import { BoringDTO } from "../../../../dto/serviceModel/BoringDTO";
 import { ServiceModel } from "../servicemodel";
 import { Layer } from "./layer";
-import { SPTResult } from "./sptResult";
+import { SPTResult, SPTResultSet } from "./sptResult";
 
 export class Boring extends ServiceModel {
     private name: string;
@@ -14,7 +14,7 @@ export class Boring extends ServiceModel {
     private undergroundWater: number;
     
     private layers: Layer[];
-    private sptResult: SPTResult;
+    private sptResultSet: SPTResultSet;
 
     addLayer(layer: Layer) {
         this.layers.push(layer);
@@ -35,6 +35,14 @@ export class Boring extends ServiceModel {
         }
     }
 
+    updateLayer(id: string, name: string, thicknes: number) {
+        const index = this.layers.findIndex(layer => layer.elementId.getValue() == id);
+        if(index != -1) {
+            this.layers[index].setName(name);
+            this.layers[index].setThickness(thicknes);
+        }
+    }
+
     serialize():BoringDTO {
         const data: BoringDTO = {
             name: this.name,
@@ -48,7 +56,7 @@ export class Boring extends ServiceModel {
                     thickness: layer.getThickness(),
             }}),
             location: this.location,
-            sptResults: this.sptResult.getAllResults(),
+            sptResults: this.sptResultSet.getAllResults(),
             id: this.elementId.getValue(),
             modelType: this.modelType
         }
@@ -80,8 +88,8 @@ export class Boring extends ServiceModel {
         return this.layers;
     }
 
-    getSPTResult() {
-        return this.sptResult;
+    getSPTResultSet() {
+        return this.sptResultSet;
     }
 
     static deserialize(dto: BoringDTO):Boring {
@@ -93,9 +101,10 @@ export class Boring extends ServiceModel {
         
         const orderedSpts = dto.sptResults.sort((a, b) => a.depth - b.depth);
         orderedSpts.forEach(spt => {
-            boring.sptResult.registerResult(spt.depth, {hitCount: spt.hitCount, distance: spt.distance});
+            boring.sptResultSet.registerResult(spt.depth, new SPTResult(spt.depth, spt.hitCount, spt.distance, spt.id));
         })
-        
+
+
         return boring;
     }
 
@@ -113,12 +122,12 @@ export class Boring extends ServiceModel {
         clonedBoring.layers = this.layers.map(layer => new Layer(layer.getName(), layer.getThickness(), layer.elementId.getValue()));
 
         // Copy spt results
-        const sptResultsCopy = new SPTResult();
-        const orderedSpts = this.sptResult.getAllResults();
+        const sptResultsCopy = new SPTResultSet();
+        const orderedSpts = this.sptResultSet.getAllResults();
         orderedSpts.forEach(spt => {
-            sptResultsCopy.registerResult(spt.depth, {hitCount: spt.hitCount, distance: spt.distance});
+            sptResultsCopy.registerResult(spt.depth, new SPTResult(spt.depth, spt.hitCount, spt.distance));
         });
-        clonedBoring.sptResult = sptResultsCopy;
+        clonedBoring.sptResultSet = sptResultsCopy;
 
         return clonedBoring;
     }
@@ -136,6 +145,6 @@ export class Boring extends ServiceModel {
         this.undergroundWater = undergroundWater;
         this.location = location;
         this.layers = [];
-        this.sptResult = new SPTResult();
+        this.sptResultSet = new SPTResultSet();
     }
 }

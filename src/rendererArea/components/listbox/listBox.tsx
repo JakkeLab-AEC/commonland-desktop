@@ -7,9 +7,10 @@ interface ListBoxProps {
     header: string,
     maxLength?: number
     onClickHandler?: (id: string) => void,
+    onCheckedHandler?: (id: string, checked: boolean) => void,
 }
 
-export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, maxLength = 16}) => {
+export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, onCheckedHandler, maxLength = 16}) => {
     const convertedItems:{key: string, value: string}[] = [];
     if(items && items.size > 0) {
         items.forEach((value, key) => {
@@ -17,29 +18,10 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
         })
     }
 
-    const onCheckedHandler = (id: string, checked: boolean) => {
-        console.log(`${id} : ${checked ? 'checked': 'unchecked'}`);
-    }
-
     const onClickWrapper = (id: string) => {
         if(onClickHandler) {
             onClickHandler(id);
         }
-    }
-    
-    const ListBoxItems = () => {
-        return (
-            <div>
-                {convertedItems.map(item => {
-                    return (
-                    <ListBoxItem 
-                        id={item.key} 
-                        displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
-                        onCheckedHandler={onCheckedHandler} 
-                        onClickItemHandler={onClickWrapper} />)
-                })}
-            </div>
-        )
     }
 
     const listBoxStyle: React.CSSProperties = {
@@ -58,9 +40,14 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
                 <ListBoxItem id={"header"} displayText={header} />
             </div>
             <hr />
-            <div>
-                <ListBoxItems />
-            </div>
+            {convertedItems.map(item => {
+                    return (
+                    <ListBoxItem 
+                        id={item.key} 
+                        displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
+                        onCheckedHandler={onCheckedHandler} 
+                        onClickItemHandler={onClickWrapper} />)
+                })}
         </div>
     )
 }

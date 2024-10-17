@@ -1,17 +1,26 @@
-import React, { useRef, useState } from "react"
+import React, { ChangeEvent, useRef, useState } from "react"
 import {ButtonPositive} from "../../../../../components/buttons/buttonPositive";
 import { ContextMenu, ContextMenuItemProp } from "../../../../../components/contextmenu/contextMenu";
-import { SPTResult } from "../../../../../../mainArea/models/serviceModels/boring/sptResult";
+import { SPTResult, SPTResultSet } from "../../../../../../mainArea/models/serviceModels/boring/sptResult";
 import { Inspector } from "../../../../../../rendererArea/components/inspector/inspector";
 import { ButtonNegative } from "../../../../../../rendererArea/components/buttons/buttonNegative";
 
 interface SPTResultUnitProp {
+    id: string,
     depth: number,
     hitCount: number,
-    distance: number
+    distance: number,
+    onChangeValueSet: (id: string, depth: number, hitCount: number, distance: number) => void,
 }
 
-export const SPTResultUnit:React.FC<SPTResultUnitProp> = ({depth, hitCount, distance}) => {
+export const SPTResultUnit:React.FC<SPTResultUnitProp> = ({id, depth, hitCount, distance, onChangeValueSet}) => {
+    const hitCountRef = useRef<HTMLInputElement>(null);
+    const distanceRef = useRef<HTMLInputElement>(null);
+    
+    const onChangeValue = (e: ChangeEvent<HTMLInputElement>) => {
+        onChangeValueSet(id, depth, parseFloat(hitCountRef.current.value), parseFloat(distanceRef.current.value));
+    }
+    
     return(
         <div className="flex flex-row">
             <div className="w-[48px]">
@@ -19,11 +28,27 @@ export const SPTResultUnit:React.FC<SPTResultUnitProp> = ({depth, hitCount, dist
             </div>
             <div className="flex-1 flex flex-row gap-1">
                 <div className="w-[36px]">
-                    <input type="number" defaultValue={hitCount} className="w-[36px] border" min={1} max={99} maxLength={2}/>
+                    <input 
+                        type="number" 
+                        defaultValue={hitCount} 
+                        className="w-[36px] border" 
+                        min={1} 
+                        max={99} 
+                        maxLength={2}
+                        onChange={onChangeValue}
+                        ref={hitCountRef}/>
                 </div>
                 <div>/</div>
                 <div className="w-[24px]">
-                    <input type="number" defaultValue={distance} className="w-[36px] border" min={1} max={99} maxLength={2}/>
+                    <input 
+                        type="number" 
+                        defaultValue={distance} 
+                        className="w-[36px] border" 
+                        min={1} 
+                        max={99} 
+                        maxLength={2}
+                        onChange={onChangeValue}
+                        ref={distanceRef}/>
                 </div>
             </div>
         </div>
@@ -31,26 +56,34 @@ export const SPTResultUnit:React.FC<SPTResultUnitProp> = ({depth, hitCount, dist
 }
 
 interface SPTResultSetProp {
-    result: SPTResult;
+    result: SPTResultSet;
+    onChangeValueSetListner: (id: string, depth: number, hitCount: number, distance: number) => void;
 }
 
 
-const SPTResults: React.FC<SPTResultSetProp> = ({ result }) => (
+const SPTResults: React.FC<SPTResultSetProp> = ({ result, onChangeValueSetListner }) => (
     <div className="flex flex-col gap-2 p-2 h-[300px]">
         {result.getAllResults().map((spt, index) => (
-            <SPTResultUnit key={index} depth={spt.depth} hitCount={spt.hitCount} distance={spt.distance} />
+            <SPTResultUnit 
+                id={spt.id}
+                key={spt.id} 
+                depth={spt.depth} 
+                hitCount={spt.hitCount} 
+                distance={spt.distance} 
+                onChangeValueSet={onChangeValueSetListner}/>
         ))}
     </div>
 );
 
 interface SPTSheetProps {
-    SPTResultValues: SPTResult
+    SPTResultSet: SPTResultSet
     onClickSetDepth?: (e: number) => void;
+    onChangeValueSetListner: (id: string, depth: number, hitCount: number, distance: number) => void;
 }
 
 
 
-export const SPTSheet:React.FC<SPTSheetProps> = ({SPTResultValues, onClickSetDepth}) => {
+export const SPTSheet:React.FC<SPTSheetProps> = ({SPTResultSet, onClickSetDepth, onChangeValueSetListner}) => {
     const [contextMenuVisibility, toggleContextMenu] = useState<boolean>(false);
     const [sptSettingVisibility, setSptSettingVisibility] = useState<boolean>(false);
     const depthRef = useRef<HTMLInputElement>(null);
@@ -123,7 +156,7 @@ export const SPTSheet:React.FC<SPTSheetProps> = ({SPTResultValues, onClickSetDep
                 <ButtonPositive text={"..."} width={32} onClickHandler={showContextMenu} isEnabled={true}/>
             </div>
             <div className="flex flex-grow" style={{overflowY: 'auto'}}>
-                <SPTResults result={SPTResultValues} />
+                <SPTResults result={SPTResultSet} onChangeValueSetListner={onChangeValueSetListner} />
             </div>
             {contextMenuVisibility && 
             <div style={{top: 44, right: 60, position: 'absolute'}}>
