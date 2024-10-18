@@ -38,4 +38,9 @@ export const setIpcBoringRepository = (ipcMain: IpcMain) => {
         const removeJob = await AppController.getInstance().getRepository('Boring').removeBoring(ids);
         return removeJob;
     });
+
+    ipcMain.handle('boring-repository-update-batch', async(_, idAndOptions: {id: string, option: boolean}[]) => {
+        const updateBatchJob = await AppController.getInstance().getRepository('Boring').updateBoringBatch(idAndOptions);
+        return updateBatchJob;
+    })
 }

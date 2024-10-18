@@ -58,6 +58,7 @@ async function initializeDB(db: Database) {
             location_x NUMERIC NOT NULL,
             location_y NUMERIC NOT NULL,
             topo_top NUMERIC NOT NULL,
+            is_batched INTEGER NOT NULL CHECK (is_batched IN (0, 1)),
             underground_water NUMERIC NOT NULL
         );
 

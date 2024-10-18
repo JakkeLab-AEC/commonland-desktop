@@ -19,6 +19,7 @@ interface ConvertedItemProps {
 
 export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, onCheckedHandler, maxLength = 16}) => {
     const [convertedItems, setConvertedItems] = useState<ConvertedItemProps[]>([]);
+    const [headerChecked, setHeaderChecked] = useState<boolean>(false);
     
     const convertItems = (items: Map<string, {displayString: string, checked: boolean}>) => {
         const newConvertedItems:ConvertedItemProps[] = []; 
@@ -33,6 +34,9 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
     const onCheckedWrapper = (id: string, checked: boolean) => {
         onCheckedHandler(id, checked, null);
         convertedItems.find(r => r.key == id).isChecked = checked;
+        if(headerChecked && !checked) {
+            setHeaderChecked(false);
+        }
     }
 
     const onClickWrapper = (id: string) => {
@@ -57,16 +61,20 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
         });
         onCheckedHandler('', true, isChecked);
         setConvertedItems(newConvertedItems);
+        setHeaderChecked(isChecked);
     }
 
     useEffect(() => {
         convertItems(items);
+        if(items.size == 0) {
+            setHeaderChecked(false);
+        }
     }, [items])
 
     return (
         <div className="flex flex-col h-full" style={listBoxStyle}>
             <div>
-                <ListBoxHeader id={"header"} displayText={header} onCheckedHandler={onCheckHeaderHandler}/>
+                <ListBoxHeader id={"header"} displayText={header} onCheckedHandler={onCheckHeaderHandler} checked={headerChecked}/>
             </div>
             <hr />
             <div className="h-full" style={{overflowY:'auto'}}>

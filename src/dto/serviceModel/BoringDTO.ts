@@ -17,4 +17,5 @@ export interface BoringDTO extends DTOBase {
         hitCount: number,
         distance: number,
     }[],
+    isBatched: 0 | 1,
 }

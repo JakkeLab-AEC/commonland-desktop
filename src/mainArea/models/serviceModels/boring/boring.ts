@@ -14,6 +14,8 @@ export class Boring extends ServiceModel {
     private layers: Layer[];
     private sptResultSet: SPTResultSet;
 
+    private isBatched: boolean;
+
     addLayer(layer: Layer) {
         this.layers.push(layer);
     }
@@ -56,7 +58,8 @@ export class Boring extends ServiceModel {
             location: this.getLocation(),
             sptResults: this.sptResultSet.getAllResults(),
             id: this.elementId.getValue(),
-            modelType: this.modelType
+            modelType: this.modelType,
+            isBatched: this.isBatched ? 1 : 0,
         }
 
         return data;
@@ -122,8 +125,18 @@ export class Boring extends ServiceModel {
         return this.sptResultSet;
     }
 
+    getBatched() {
+        return this.isBatched;
+    }
+
+    setBatched(isBatched: boolean) {
+        this.isBatched = isBatched;
+    }
+
     static deserialize(dto: BoringDTO):Boring {
         const boring = new Boring(dto.name, dto.location.x, dto.location.y, dto.topoTop, dto.undergroundWater, dto.id);
+        boring.setBatched(dto.isBatched == 1 ? true : false);
+
         const orderedLayers = dto.layers.sort((a, b) => a.layerIndex - b.layerIndex);
         orderedLayers.forEach(layer => {
             boring.addLayer(new Layer(layer.name, layer.thickness, layer.id));
@@ -133,7 +146,6 @@ export class Boring extends ServiceModel {
         orderedSpts.forEach(spt => {
             boring.sptResultSet.registerResult(spt.depth, new SPTResult(spt.depth, spt.hitCount, spt.distance, spt.id));
         })
-
 
         return boring;
     }
@@ -160,6 +172,9 @@ export class Boring extends ServiceModel {
         });
         clonedBoring.sptResultSet = sptResultsCopy;
 
+        // Copy batch state
+        clonedBoring.setBatched(this.isBatched);
+
         return clonedBoring;
     }
 
@@ -168,7 +183,7 @@ export class Boring extends ServiceModel {
         locationX: number, 
         locationY: number, 
         topoTop: number, 
-        undergroundWater: number, 
+        undergroundWater: number,
         key?: string
     ) {
         super(key);
@@ -179,5 +194,6 @@ export class Boring extends ServiceModel {
         this.undergroundWater = undergroundWater;
         this.layers = [];
         this.sptResultSet = new SPTResultSet();
+        this.isBatched = false;
     }
 }

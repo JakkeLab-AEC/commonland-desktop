@@ -3,10 +3,11 @@ import React from "react"
 interface ListBoxHeaderProps {
     id: string,
     displayText: string;
+    checked: boolean;
     onCheckedHandler?: (isChecked: boolean) => void;
 }
 
-export const ListBoxHeader:React.FC<ListBoxHeaderProps> = ({id, displayText, onCheckedHandler}) => {
+export const ListBoxHeader:React.FC<ListBoxHeaderProps> = ({id, displayText, checked, onCheckedHandler}) => {
 
     const onChekcedWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
         if(onCheckedHandler) {
@@ -19,7 +20,8 @@ export const ListBoxHeader:React.FC<ListBoxHeaderProps> = ({id, displayText, onC
             <div>
                 <input 
                     type='checkbox'
-                    onChange={onChekcedWrapper}/>
+                    onChange={onChekcedWrapper}
+                    checked={checked}/>
             </div>
             <div>
                 {displayText}
