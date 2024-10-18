@@ -36,8 +36,6 @@ export const InspectorBoringEdit: React.FC<BoringEditorProps> = ({boring}) => {
     }
 
     const onClickSave = async () => {
-        console.log(boring);
-        
         const newInspectorWindowTitle = `${findValue('BoringEditor', 'editorHeader')} : ${boring.getName().length > 16 ? boring.getName().substring(0, 15)+'...' : boring.getName()}`;
         const updateInspectorTitle = () => {
             setInspectorTitle(newInspectorWindowTitle)

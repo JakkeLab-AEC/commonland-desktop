@@ -238,10 +238,13 @@ export class BoringRepository implements BoringCRUDMethods {
     }
 
     async updateBoring(boringDto: BoringDTO): Promise<{result: boolean, message?: string, updateError?: DBError}> {
+        // Update mode
+        let updateMode: 'noRenaming'|'Renaming' = 'Renaming';
+        
         // Pre-check - Search boring names for prevention of Unique constrain error.
         const query = `
             SELECT 
-                name
+                boring_id, name
             FROM 
                 ${DB_TABLENAMES.BORINGS}
             WHERE
@@ -253,17 +256,24 @@ export class BoringRepository implements BoringCRUDMethods {
         }
 
         if(searchJob.length != 0) {
-            return {result: false, updateError: DB_ERRORCODE['nameDuplication']}
+            if(searchJob.filter(col => col.boring_id == boringDto.id).length == 0) {
+                return {result: false, updateError: DB_ERRORCODE['nameDuplication']}
+            } else {
+                updateMode = 'noRenaming';
+            }
         }
         
         // Update works
+        const boringColumnsNoRenaming = ['location_x', 'location_y', 'topo_top', 'underground_water'];
         const boringColumns = ['name', 'location_x', 'location_y', 'topo_top', 'underground_water'];
         const {name, location, topoTop, undergroundWater, id} = boringDto;
         
         const layerColumns = ['layer_id', 'boring_id', 'layer_index', 'name', 'thickness'];
         const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitCount', 'distance'];
 
-        const queryBoring = RepositryQueryBuilder.buildUpdateQuery(DB_TABLENAMES.BORINGS, boringColumns, 'boring_id');
+        const queryBoring = updateMode == 'Renaming' ? 
+            RepositryQueryBuilder.buildUpdateQuery(DB_TABLENAMES.BORINGS, boringColumns, 'boring_id') : 
+            RepositryQueryBuilder.buildUpdateQuery(DB_TABLENAMES.BORINGS, boringColumnsNoRenaming, 'boring_id');
         
         const layerInsertQuery = RepositryQueryBuilder.buildInsertQuery(DB_TABLENAMES.LAYERS, layerColumns);
         const layerParams = boringDto.layers.map(layer => {
@@ -291,7 +301,9 @@ export class BoringRepository implements BoringCRUDMethods {
             await this.db.exec('BEGIN TRANSACTION');
 
             // Update boring data
-            const updateJob = await this.db.all(queryBoring, [name, location.x, location.y, topoTop, undergroundWater, id]);
+            const updateJob = updateMode == 'Renaming' ? 
+                await this.db.all(queryBoring, [name, location.x, location.y, topoTop, undergroundWater, id]) :
+                await this.db.all(queryBoring, [location.x, location.y, topoTop, undergroundWater, id])
 
             // Update layer data
             const layerDeleteQuery = `
