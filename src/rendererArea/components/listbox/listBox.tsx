@@ -4,7 +4,7 @@ import { ListBoxHeader } from "./listBoxHeader";
 
 interface ListBoxProps {
     height: number;
-    items: Map<string, string>;
+    items: Map<string, {displayString: string, checked: boolean}>;
     header: string,
     maxLength?: number
     onClickHandler?: (id: string) => void,
@@ -20,11 +20,11 @@ interface ConvertedItemProps {
 export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, onCheckedHandler, maxLength = 16}) => {
     const [convertedItems, setConvertedItems] = useState<ConvertedItemProps[]>([]);
     
-    const convertItems = (items: Map<string, string>) => {
+    const convertItems = (items: Map<string, {displayString: string, checked: boolean}>) => {
         const newConvertedItems:ConvertedItemProps[] = []; 
         if(items && items.size > 0) {
             items.forEach((value, key) => {
-                newConvertedItems.push({key: key, value: value, isChecked: false});
+                newConvertedItems.push({key: key, value: value.displayString, isChecked: value.checked});
             })
         }
         setConvertedItems(newConvertedItems);
@@ -47,7 +47,6 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
         borderBottomWidth: 1, 
         borderBottomColor: 'silver', 
         height: height ? height : 300,
-        overflowY:'scroll',
         userSelect:'none'
     }
 
@@ -65,20 +64,22 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
     }, [items])
 
     return (
-        <div style={listBoxStyle}>
+        <div className="flex flex-col h-full" style={listBoxStyle}>
             <div>
                 <ListBoxHeader id={"header"} displayText={header} onCheckedHandler={onCheckHeaderHandler}/>
             </div>
             <hr />
-            {convertedItems.map(item => {
+            <div className="h-full" style={{overflowY:'auto'}}>
+                {convertedItems.map(item => {
                     return (
-                    <ListBoxItem 
-                        id={item.key}
-                        isChecked={item.isChecked}
-                        displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
-                        onCheckedHandler={onCheckedWrapper} 
-                        onClickItemHandler={onClickWrapper} />)
-                })}
+                        <ListBoxItem 
+                            id={item.key}
+                            isChecked={item.isChecked}
+                            displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
+                            onCheckedHandler={onCheckedWrapper} 
+                            onClickItemHandler={onClickWrapper} />)
+                    })}
+            </div>
         </div>
     )
 }

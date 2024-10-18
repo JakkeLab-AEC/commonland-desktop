@@ -3,9 +3,10 @@ import { create } from "zustand";
 
 interface EditorPageStore {
     borings: Map<string, Boring>;
-    boringDisplayItems: Map<string, string>;
+    boringDisplayItems: Map<string, {displayString :string, checked: boolean}>;
     selectedBoringId: string;
     updateEventListners: Array<() => void>;
+    checkedBoringIds:Set<string>;
     fetchAllBorings:() => Promise<void>;
     createNewBoring: () => void;
     insertBoring: (boring: Boring) => void;
@@ -16,6 +17,8 @@ interface EditorPageStore {
     unselectBoring: () => void;
     searchBoringName: (name: string) => Promise<'found'|'notfound'|'internalError'>
     searchBoringNamePattern: (prefix: string, index: number) => Promise<string[]>;
+    saveCheckedBoringIds: (ids: Set<string>) => void;
+    updateBoringDisplayItem: (id: string, checked: boolean) => void;
 }
 
 export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
@@ -23,19 +26,28 @@ export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
     boringDisplayItems: new Map(),
     selectedBoringId: null,
     updateEventListners: [],
+    checkedBoringIds: new Set(),
     fetchAllBorings: async () => {
         const fetchJob = await window.electronBoringDataAPI.fetchAllBorings();
         if(fetchJob.result) {
             const borings:[string, Boring][] = [];
-            const boringDisplayItems:[string, string][] = [];
+            const boringDisplayItems:[string, {displayString: string, checked: boolean}][] = [];
             fetchJob.fetchedBorings.forEach(boring => {
+                // Get target boring and add to borings
                 const targetBoring = Boring.deserialize(boring);
                 borings.push([targetBoring.getId().getValue(), targetBoring]);
-                boringDisplayItems.push([targetBoring.getId().getValue(), targetBoring.getName()]);
+
+                // Get boring display items from former status;
+                const formerStatus = get().boringDisplayItems;
+                const formerChecked = formerStatus.get(targetBoring.getId().getValue());
+                boringDisplayItems.push([
+                    targetBoring.getId().getValue(), 
+                    {displayString: targetBoring.getName(), checked: formerChecked ? formerChecked.checked : false}
+                ]);
             });
 
             const newBorings: Map<string, Boring> = new Map(borings);
-            const newBoringDisplayItems: Map<string, string> = new Map(boringDisplayItems);
+            const newBoringDisplayItems: Map<string, {displayString: string, checked: boolean}> = new Map(boringDisplayItems);
             set(() => { 
                 return {
                     borings: newBorings,
@@ -52,7 +64,6 @@ export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
         const insertJob = await window.electronBoringDataAPI.insertBoring(boringDto);
     },
     updateBoring: async (boring: Boring) => {
-        console.log(boring.serialize());
         const updateJob = await window.electronBoringDataAPI.updateBoring(boring.serialize());
         if(updateJob.updateError) {
             alert(updateJob.updateError.message);
@@ -70,7 +81,6 @@ export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
     },
     removeBoring: async (ids: string[]) => {
         const removeJob = await window.electronBoringDataAPI.removeBoring(ids);
-        console.log(removeJob);
         get().fetchAllBorings();
         return removeJob.result;
     },
@@ -119,5 +129,14 @@ export const useEditorPageStore = create<EditorPageStore>((set, get) => ({
         const updatedListners = [...state.updateEventListners];
         updatedListners.push(listner);
         set(() => { return { updateEventListners: updatedListners}});
-    }
+    },
+    saveCheckedBoringIds: (ids: Set<string>) => {
+        set(() => { return {checkedBoringIds : ids}});
+    },
+    updateBoringDisplayItem: (id: string, checked: boolean) => {
+        const items = new Map(get().boringDisplayItems);
+        items.get(id).checked = checked;
+
+        set(() => {return {boringDisplayItems : items}});
+    },
 }));

@@ -8,7 +8,6 @@ import {ButtonPositive} from "../../../../rendererArea/components/buttons/button
 import {ButtonNegative} from "../../../../rendererArea/components/buttons/buttonNegative";
 import { useEditorPageStore } from "./EditorPageStore";
 import { Boring } from "../../../../mainArea/models/serviceModels/boring/boring";
-import { generateUUID } from "three/src/math/MathUtils";
 
 interface InspectorContent {
     boring: Boring
@@ -47,7 +46,8 @@ export const BoringManager = () => {
         unselectBoring,
         borings,
         boringDisplayItems,
-        selectedBoringId
+        selectedBoringId,
+        updateBoringDisplayItem
     } = useEditorPageStore();
 
     
@@ -118,9 +118,6 @@ export const BoringManager = () => {
       
         // Fetch updated borings
         await fetchAllBorings();
-      
-        // Re-wrap the display data after fetching updated borings
-        await wrapBoringDisplayData(borings);
     };
 
     const onClickRemoveBoring = async () => {
@@ -133,13 +130,6 @@ export const BoringManager = () => {
         if(result) {
             setCheckedItems(new Set());
         }
-    }
-
-    const wrapBoringDisplayData = async (borings: Map<string, Boring>) => {
-        const boringsMap:Map<string, string> = new Map();
-        borings.forEach(boring => {
-            boringsMap.set(boring.getId().getValue(), boring.getName());
-        });
     }
 
     const allowedCharactersOnPrefix = /^[a-zA-Z]*$/;
@@ -160,10 +150,15 @@ export const BoringManager = () => {
     }
 
     const onCheckedItemHandler = (id: string, checked: boolean, all?: boolean) => {
+
         if(all != null) {
             if(all) {
-                setCheckedItems(new Set(borings.keys().toArray()));
+                const ids = new Set(borings.keys().toArray());
+                ids.forEach(id => updateBoringDisplayItem(id, true));
+                setCheckedItems(ids);
             } else {
+                const ids = new Set(borings.keys().toArray());
+                ids.forEach(id => updateBoringDisplayItem(id, false));
                 setCheckedItems(new Set());
             }
         } else {
@@ -174,19 +169,18 @@ export const BoringManager = () => {
                 newSet.delete(id);
             }
             setCheckedItems(newSet);
+            updateBoringDisplayItem(id, checked);
         }
     }
 
     useEffect(() => {
         fetchAllBorings();
-    }, [fetchAllBorings]);
+    }, []);
     
     const onChangeNamingMode =(e:ChangeEvent<HTMLInputElement>) => {
         if(e.target.value == 'manual') {
-            console.log('manual');
             setNamingMode('manual')
         } else if(e.target.value == 'autoincrement') {
-            console.log('auto');
             setNamingMode('autoincrement');
         }
     }
@@ -201,7 +195,7 @@ export const BoringManager = () => {
             <div>
                 <ListBox 
                     height={420} 
-                    items={boringDisplayItems} 
+                    items={boringDisplayItems}
                     onClickHandler={onClickHandler} 
                     onCheckedHandler={onCheckedItemHandler}
                     header={findValue('BoringManager', 'boringListBoxHeader')}/>

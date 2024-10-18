@@ -25,6 +25,7 @@ export const InspectorBoringEdit: React.FC<BoringEditorProps> = ({boring}) => {
     const {
         updateBoring,
         registerUpdateEventListner,
+        boringDisplayItems,
     } = useEditorPageStore();
 
     const [currentLayers, setLayers] = useState<Layer[]>(boring.getLayers());
@@ -87,17 +88,13 @@ export const InspectorBoringEdit: React.FC<BoringEditorProps> = ({boring}) => {
         boring.setName(e.target.value);
     }
 
-    useEffect(() => {
-        console.log(boring);
-    })
-
     return (
         <div className="flex flex-col w-full h-full">
             <div className="flex flex-row flex-grow" style={{overflowY: 'hidden', borderBottomWidth: 1}}>
                 {/* Left column with fixed height content */}
                 <div className="flex flex-col w-[260px]" style={{borderRightWidth: 1}}>
                     {/* Boring name */}
-                    <div className="grid grid-cols-[76px_1fr] p-2">
+                    <div className="grid grid-cols-[76px_1fr] p-2 gap-1">
                         <div>{findValue("BoringEditor", "boringNameHeader")}</div>
                         <input 
                             ref={tbBoringName} 
