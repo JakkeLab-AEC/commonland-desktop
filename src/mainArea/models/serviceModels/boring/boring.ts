@@ -5,10 +5,8 @@ import { SPTResult, SPTResultSet } from "./sptResult";
 
 export class Boring extends ServiceModel {
     private name: string;
-    private location: {
-        x: number,
-        y: number,
-    };
+    private locationX: number;
+    private locationY: number;
     
     private topoTop: number;
     private undergroundWater: number;
@@ -55,7 +53,7 @@ export class Boring extends ServiceModel {
                     name: layer.getName(),
                     thickness: layer.getThickness(),
             }}),
-            location: this.location,
+            location: this.getLocation(),
             sptResults: this.sptResultSet.getAllResults(),
             id: this.elementId.getValue(),
             modelType: this.modelType
@@ -68,20 +66,52 @@ export class Boring extends ServiceModel {
         return this.name;
     }
 
+    setName(name: string) {
+        this.name = name;
+    }
+
     getId() {
         return this.elementId;
     }
 
     getLocation() {
-        return this.location;
+        return {
+            x: this.locationX,
+            y: this.locationY,
+        }
+    }
+
+    getLocationX() {
+        return this.locationX;
+    }
+
+    getLocationY() {
+        return this.locationY;
+    }
+
+    setLocationX(coord: number) {
+        return this.locationX = coord;
+    }
+
+    setLocationY(coord: number) {
+        return this.locationY = coord;
     }
 
     getTopoTop() {
         return this.topoTop;
     }
 
+    setTopoTop(level: number) {
+        this.topoTop = level;
+    }
+
+
     getUndergroundWater() {
         return this.undergroundWater;
+    }
+
+    setUndergroundWater(level: number) {
+        this.undergroundWater = level;
     }
 
     getLayers() {
@@ -93,7 +123,7 @@ export class Boring extends ServiceModel {
     }
 
     static deserialize(dto: BoringDTO):Boring {
-        const boring = new Boring(dto.name, dto.location, dto.topoTop, dto.undergroundWater, dto.id);
+        const boring = new Boring(dto.name, dto.location.x, dto.location.y, dto.topoTop, dto.undergroundWater, dto.id);
         const orderedLayers = dto.layers.sort((a, b) => a.layerIndex - b.layerIndex);
         orderedLayers.forEach(layer => {
             boring.addLayer(new Layer(layer.name, layer.thickness, layer.id));
@@ -112,7 +142,8 @@ export class Boring extends ServiceModel {
         // New boring instnace
         const clonedBoring = new Boring(
             this.name, 
-            { ...this.location },  // copy
+            this.locationX,
+            this.locationY,
             this.topoTop, 
             this.undergroundWater, 
             this.elementId.getValue()
@@ -134,16 +165,18 @@ export class Boring extends ServiceModel {
 
     constructor(
         name: string,
-        location: {x: number, y: number}, 
+        locationX: number, 
+        locationY: number, 
         topoTop: number, 
         undergroundWater: number, 
         key?: string
     ) {
         super(key);
         this.name = name;
+        this.locationX = locationX;
+        this.locationY = locationY;
         this.topoTop = topoTop;
         this.undergroundWater = undergroundWater;
-        this.location = location;
         this.layers = [];
         this.sptResultSet = new SPTResultSet();
     }

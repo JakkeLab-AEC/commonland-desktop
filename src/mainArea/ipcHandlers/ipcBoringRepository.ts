@@ -18,11 +18,19 @@ export const setIpcBoringRepository = (ipcMain: IpcMain) => {
         return updateJob;
     });
 
-    ipcMain.handle('boring-repository-search-names', async(_, prefix: string, index:number) => {
+    ipcMain.handle('boring-repository-search-name-pattern', async(_, prefix: string, index:number) => {
         const searchNamesJob = await AppController
             .getInstance()
             .getRepository('Boring')
-            .searchBoringNames(prefix, index);
+            .searchBoringNamePattern(prefix, index);
+        return searchNamesJob;
+    });
+
+    ipcMain.handle('boring-repository-search-name-exact', async(_, name: string) => {
+        const searchNamesJob = await AppController
+            .getInstance()
+            .getRepository('Boring')
+            .searchBoringName(name);
         return searchNamesJob;
     });
 

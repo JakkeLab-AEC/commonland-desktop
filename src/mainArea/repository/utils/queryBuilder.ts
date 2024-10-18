@@ -5,7 +5,17 @@ export class RepositryQueryBuilder {
     }
     
     static buildUpdateQuery(tableName: string, columnNames: string[], idColumn: string) {
-        const parameters = columnNames.map(col => `${col} = ?`).join(', ');
-        return `UPDATE ${tableName} SET ${parameters} WHERE ${idColumn} = ?`;
+        const parameters = columnNames.map(col => `${col}`).join(', ');
+        const parameterInputs = [];
+        for(let i = 0; i < columnNames.length; i++) {
+            parameterInputs.push('?');
+        }
+        return `
+            UPDATE 
+                ${tableName} 
+            SET 
+                (${parameters}) = (${parameterInputs.join(', ')})
+            WHERE 
+                ${idColumn} = ?`;
     }
 }

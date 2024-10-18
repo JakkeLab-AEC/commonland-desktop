@@ -3,6 +3,7 @@ import { Database } from "sqlite";
 import { RepositryQueryBuilder } from "./utils/queryBuilder";
 import { DB_TABLENAMES } from "../../public/databaseProps";
 import { ModelType } from "../models/modelType";
+import { DB_ERRORCODE, DBError } from "../../public/databaseErrors";
 
 interface BoringCRUDMethods {
     insertBoring(boringDto: BoringDTO): Promise<{ result: boolean, message?: string }>;
@@ -113,8 +114,8 @@ export class BoringRepository implements BoringCRUDMethods {
                     undergroundWater: boring.underground_water,
                     layers: [],
                     location: {
-                        x: 0,
-                        y: 0
+                        x: boring.location_x,
+                        y: boring.location_y
                     },
                     sptResults: [],
                     id: boring.boring_id,
@@ -236,10 +237,29 @@ export class BoringRepository implements BoringCRUDMethods {
         }
     }
 
-    async updateBoring(boringDto: BoringDTO): Promise<{result: boolean, message?: string}> {
-        const boringColumns = ['name', 'location_x', 'location_y', 'topo_top', 'underground_water'];
-        const {name, location, topoTop, undergroundWater} = boringDto;
+    async updateBoring(boringDto: BoringDTO): Promise<{result: boolean, message?: string, updateError?: DBError}> {
+        // Pre-check - Search boring names for prevention of Unique constrain error.
+        const query = `
+            SELECT 
+                name
+            FROM 
+                ${DB_TABLENAMES.BORINGS}
+            WHERE
+                name = ?
+        `
+        const searchJob = await this.db.all(query, boringDto.name);
+        if(!searchJob) {
+            return {result: false, updateError: DB_ERRORCODE['internalError']}
+        }
 
+        if(searchJob.length != 0) {
+            return {result: false, updateError: DB_ERRORCODE['nameDuplication']}
+        }
+        
+        // Update works
+        const boringColumns = ['name', 'location_x', 'location_y', 'topo_top', 'underground_water'];
+        const {name, location, topoTop, undergroundWater, id} = boringDto;
+        
         const layerColumns = ['layer_id', 'boring_id', 'layer_index', 'name', 'thickness'];
         const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitCount', 'distance'];
 
@@ -271,8 +291,8 @@ export class BoringRepository implements BoringCRUDMethods {
             await this.db.exec('BEGIN TRANSACTION');
 
             // Update boring data
-            await this.db.all(queryBoring, [name, location.x, location.y, topoTop, undergroundWater]);
-            
+            const updateJob = await this.db.all(queryBoring, [name, location.x, location.y, topoTop, undergroundWater, id]);
+
             // Update layer data
             const layerDeleteQuery = `
                 DELETE FROM ${DB_TABLENAMES.LAYERS} WHERE boring_id = ?
@@ -336,7 +356,7 @@ export class BoringRepository implements BoringCRUDMethods {
         }
     }
 
-    async searchBoringNames(prefix: string, index:number): Promise<{result: boolean, message?: string, searchedNames?: string[]}> {
+    async searchBoringNamePattern(prefix: string, index:number): Promise<{result: boolean, message?: string, searchedNames?: string[]}> {
         try {
             const query = `
                 SELECT
@@ -363,6 +383,38 @@ export class BoringRepository implements BoringCRUDMethods {
                 result: false,
                 message: error.message
             };
+        }
+    }
+
+    async searchBoringName(name: string): Promise<{result: boolean, message?: string, error?: boolean}> {
+        const query = `
+            SELECT 
+                name
+            FROM 
+                ${DB_TABLENAMES.BORINGS}
+            WHERE
+                name = ?
+        `
+
+        try {
+            const searchJob = await this.db.all(query, name);
+            if(searchJob.length == 0) {
+                return {
+                    result: false,
+                    error: false,
+                }
+            } else {
+                return {
+                    result: true,
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                result: false,
+                error: true,
+                message: error
+            }
         }
     }
 }

@@ -1,13 +1,13 @@
-import { useLanguageStore } from "../../../../../rendererArea/language/languageStore";
-import { ButtonNegative } from "../../../../../rendererArea/components/buttons/buttonNegative";
-import {ButtonPositive} from "../../../../../rendererArea/components/buttons/buttonPositive";
-import { useEffect, useRef, useState } from "react";
-import { FoldableControl } from "../../../../../rendererArea/components/foldableControl/foldableControl";
+import { useLanguageStore } from "../../../../language/languageStore";
+import { ButtonNegative } from "../../../../components/buttons/buttonNegative";
+import {ButtonPositive} from "../../../../components/buttons/buttonPositive";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { FoldableControl } from "../../../../components/foldableControl/foldableControl";
 import React from "react";
 import { LayerSet } from "./detailItems/layers";
 import { SPTSheet } from "./detailItems/sptSheet";
 import { Boring } from "../../../../../mainArea/models/serviceModels/boring/boring";
-import { useHomeStore } from "../../../../../rendererArea/homeStatus/homeStatusModel";
+import { useHomeStore } from "../../../../homeStatus/homeStatusModel";
 import { Layer } from "../../../../../mainArea/models/serviceModels/boring/layer";
 import { SPTResult, SPTResultSet } from "../../../../../mainArea/models/serviceModels/boring/sptResult";
 import { useEditorPageStore } from "../EditorPageStore";
@@ -16,11 +16,15 @@ interface BoringEditorProps {
     boring: Boring
 }
 
-export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
+export const InspectorBoringEdit: React.FC<BoringEditorProps> = ({boring}) => {
     const { findValue } = useLanguageStore();
-    const {setInspectorVisiblity} = useHomeStore();
     const {
-        updateBoring
+        setInspectorVisiblity,
+        setInspectorTitle,
+    } = useHomeStore();
+    const {
+        updateBoring,
+        registerUpdateEventListner,
     } = useEditorPageStore();
 
     const [currentLayers, setLayers] = useState<Layer[]>(boring.getLayers());
@@ -32,18 +36,25 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
     }
 
     const onClickSave = async () => {
+        console.log(boring);
+        
+        const newInspectorWindowTitle = `${findValue('BoringEditor', 'editorHeader')} : ${boring.getName().length > 16 ? boring.getName().substring(0, 15)+'...' : boring.getName()}`;
+        const updateInspectorTitle = () => {
+            setInspectorTitle(newInspectorWindowTitle)
+        }
+        registerUpdateEventListner(updateInspectorTitle);
         const updateJob = updateBoring(boring);
     }
 
     const onDeleteLayer = (id: string) => {
         boring.removeLayer(id);
-        setLayers([...boring.getLayers()]);  // 새로운 레이어 배열로 상태 업데이트
+        setLayers([...boring.getLayers()]);
     }
 
     const onCreateLayer = () => {
         const layer = new Layer('레이어', 1);
         boring.addLayer(layer);
-        setLayers([...boring.getLayers()]);  // 새로운 레이어 배열로 상태 업데이트
+        setLayers([...boring.getLayers()]);
     }
 
     const onClickSetSPTDepth = (depth: number) => {
@@ -58,6 +69,30 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
         boring.updateLayer(id, name, thickness);
     }
 
+    const onChangeTopoTopHandler = (e:ChangeEvent<HTMLInputElement>) => {
+        boring.setTopoTop(parseFloat(e.target.value));
+    }
+
+    const onChangeUndergroundWaterHander = (e:ChangeEvent<HTMLInputElement>) => {
+        boring.setUndergroundWater(parseFloat(e.target.value));
+    }
+
+    const onChangeCoordXHandler = (e:ChangeEvent<HTMLInputElement>) => {
+        boring.setLocationX(parseFloat(e.target.value));
+    }
+
+    const onChangeCoordYHander = (e:ChangeEvent<HTMLInputElement>) => {
+        boring.setLocationY(parseFloat(e.target.value));
+    }
+
+    const onChangeRenameHandler = (e:ChangeEvent<HTMLInputElement>) => {
+        boring.setName(e.target.value);
+    }
+
+    useEffect(() => {
+        console.log(boring);
+    })
+
     return (
         <div className="flex flex-col w-full h-full">
             <div className="flex flex-row flex-grow" style={{overflowY: 'hidden', borderBottomWidth: 1}}>
@@ -66,7 +101,11 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
                     {/* Boring name */}
                     <div className="grid grid-cols-[76px_1fr] p-2">
                         <div>{findValue("BoringEditor", "boringNameHeader")}</div>
-                        <input ref={tbBoringName} className="border w-full" defaultValue={boring.getName()}/>
+                        <input 
+                            ref={tbBoringName} 
+                            className="border w-full" 
+                            defaultValue={boring.getName()}
+                            onChange={onChangeRenameHandler}/>
                     </div>
                     <hr />
                     {/* Coordinates */}
@@ -74,12 +113,22 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
                         <div>{findValue("BoringEditor", "boringCoordinate")}</div>
                         <div className="grid grid-cols-[28px_1fr] gap-x-2">
                             <div>X:</div>
-                            <input ref={tbBoringName} className="border w-full" type="number" step={0.01} defaultValue={boring.getLocation().x}/>
+                            <input 
+                                className="border w-full" 
+                                type="number" 
+                                step={0.01} 
+                                defaultValue={boring.getLocationX()}
+                                onChange={onChangeCoordXHandler}/>
                         </div>
                         <div></div>
                         <div className="grid grid-cols-[28px_1fr] gap-x-2">
                             <div>Y:</div>
-                            <input ref={tbBoringName} className="border w-full" type="number" step={0.01} defaultValue={boring.getLocation().y}/>
+                            <input 
+                                className="border w-full" 
+                                type="number" 
+                                step={0.01} 
+                                defaultValue={boring.getLocationY()}
+                                onChange={onChangeCoordYHander}/>
                         </div>
                     </div>
                     <hr />
@@ -88,12 +137,24 @@ export const BoringEditor: React.FC<BoringEditorProps> = ({boring}) => {
                         <div>{findValue("BoringEditor", "boringLevels")}</div>
                         <div className="grid grid-cols-[84px_1fr] gap-x-2">
                             <div>{findValue("BoringEditor", "elevation")} EL</div>
-                            <input ref={tbBoringName} className="border w-full" type="number" step={0.01} defaultValue={boring.getTopoTop()} />
+                            <input 
+                                ref={tbBoringName} 
+                                className="border w-full" 
+                                type="number" 
+                                step={0.01} 
+                                defaultValue={boring.getTopoTop()} 
+                                onChange={onChangeTopoTopHandler}/>
                         </div>
                         <div></div>
                         <div className="grid grid-cols-[84px_1fr] gap-x-2">
                             <div>{findValue("BoringEditor", "undergroundwater")} GL</div>
-                            <input ref={tbBoringName} className="border w-full" type="number" step={0.01} defaultValue={boring.getUndergroundWater()} />
+                            <input 
+                                ref={tbBoringName} 
+                                className="border w-full" 
+                                type="number" 
+                                step={0.01} 
+                                defaultValue={boring.getUndergroundWater()} 
+                                onChange={onChangeUndergroundWaterHander}/>
                         </div>
                     </div>
                     <hr />
