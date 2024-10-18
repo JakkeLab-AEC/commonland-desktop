@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ListBoxItem } from "./listBoxItem";
+import { ListBoxHeader } from "./listBoxHeader";
 
 interface ListBoxProps {
     height: number;
@@ -7,15 +8,31 @@ interface ListBoxProps {
     header: string,
     maxLength?: number
     onClickHandler?: (id: string) => void,
-    onCheckedHandler?: (id: string, checked: boolean) => void,
+    onCheckedHandler?: (id: string, checked: boolean, all?: boolean) => void,
+}
+
+interface ConvertedItemProps {
+    key: string, 
+    value: string, 
+    isChecked: boolean
 }
 
 export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header", onClickHandler, onCheckedHandler, maxLength = 16}) => {
-    const convertedItems:{key: string, value: string}[] = [];
-    if(items && items.size > 0) {
-        items.forEach((value, key) => {
-            convertedItems.push({key: key, value: value});
-        })
+    const [convertedItems, setConvertedItems] = useState<ConvertedItemProps[]>([]);
+    
+    const convertItems = (items: Map<string, string>) => {
+        const newConvertedItems:ConvertedItemProps[] = []; 
+        if(items && items.size > 0) {
+            items.forEach((value, key) => {
+                newConvertedItems.push({key: key, value: value, isChecked: false});
+            })
+        }
+        setConvertedItems(newConvertedItems);
+    }
+
+    const onCheckedWrapper = (id: string, checked: boolean) => {
+        onCheckedHandler(id, checked, null);
+        convertedItems.find(r => r.key == id).isChecked = checked;
     }
 
     const onClickWrapper = (id: string) => {
@@ -34,18 +51,32 @@ export const ListBox: React.FC<ListBoxProps> = ({height, items, header = "Header
         userSelect:'none'
     }
 
+    const onCheckHeaderHandler = (isChecked: boolean) => {
+        const newConvertedItems = [...convertedItems];
+        newConvertedItems.forEach(item => {
+            item.isChecked = isChecked;
+        });
+        onCheckedHandler('', true, isChecked);
+        setConvertedItems(newConvertedItems);
+    }
+
+    useEffect(() => {
+        convertItems(items);
+    }, [items])
+
     return (
         <div style={listBoxStyle}>
             <div>
-                <ListBoxItem id={"header"} displayText={header} />
+                <ListBoxHeader id={"header"} displayText={header} onCheckedHandler={onCheckHeaderHandler}/>
             </div>
             <hr />
             {convertedItems.map(item => {
                     return (
                     <ListBoxItem 
-                        id={item.key} 
+                        id={item.key}
+                        isChecked={item.isChecked}
                         displayText={item.value.length > maxLength ? `${item.value.substring(0, maxLength - 1)}...` : item.value} 
-                        onCheckedHandler={onCheckedHandler} 
+                        onCheckedHandler={onCheckedWrapper} 
                         onClickItemHandler={onClickWrapper} />)
                 })}
         </div>

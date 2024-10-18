@@ -159,14 +159,22 @@ export const BoringManager = () => {
         }
     }
 
-    const onCheckedItemHandler = (id: string, checked: boolean) => {
-        const newSet = new Set(checkedItems);
-        if(checked) {
-            newSet.add(id);
+    const onCheckedItemHandler = (id: string, checked: boolean, all?: boolean) => {
+        if(all != null) {
+            if(all) {
+                setCheckedItems(new Set(borings.keys().toArray()));
+            } else {
+                setCheckedItems(new Set());
+            }
         } else {
-            newSet.delete(id);
+            const newSet = new Set(checkedItems);
+            if(checked) {
+                newSet.add(id);
+            } else {
+                newSet.delete(id);
+            }
+            setCheckedItems(newSet);
         }
-        setCheckedItems(newSet);
     }
 
     useEffect(() => {
