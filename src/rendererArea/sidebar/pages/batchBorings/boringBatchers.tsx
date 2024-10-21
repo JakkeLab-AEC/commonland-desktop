@@ -3,6 +3,7 @@ import { ListBox } from "../../../../rendererArea/components/listbox/listBox"
 import { useBoringBatcherStore } from "./boringBatcherStore";
 import { ButtonPositive } from "../../../../rendererArea/components/buttons/buttonPositive";
 import { ButtonNegative } from "../../../../rendererArea/components/buttons/buttonNegative";
+import { FoldableControl } from "../../../../rendererArea/components/foldableControl/foldableControl";
 
 export const BoringBatcher = () => {
     const [checkedBatchedItems, setCheckedBatchedItems] = useState<Set<string>>(new Set());
@@ -96,8 +97,13 @@ export const BoringBatcher = () => {
                 보관된 시추공
             </div>
             <ListBox height={300} items={unbacthedBoringDisplayItems} header={"이름"} onCheckedHandler={onCheckedItemFromUnbatchedHandler}/>
-            <div className="flex flex-row gap-2">
-                <ButtonPositive text={"지형 생성"} isEnabled={true} width={72} />
+            <div>
+                시추공 옵션
+            </div>
+            <div className="flex flex-row flex-grow gap-2">
+                <FoldableControl title={"색상"}>
+                    
+                </FoldableControl>
             </div>
         </div>
     )
