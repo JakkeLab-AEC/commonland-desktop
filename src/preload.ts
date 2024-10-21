@@ -2,6 +2,7 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 import { BoringDTO } from "./dto/serviceModel/BoringDTO";
+import { DefaultDimensions } from "./rendererArea/api/three/defaultConfigs/DefaultDimensionConfigs";
 
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 contextBridge.exposeInMainWorld('electronWindowControlAPI', {

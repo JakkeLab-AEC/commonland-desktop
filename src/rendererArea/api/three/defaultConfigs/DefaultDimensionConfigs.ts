@@ -3,6 +3,7 @@ export class DefaultDimensions {
 
     private constructor() {
         this.shoringPostRadius = 1;
+        DefaultDimensions.instance = this;
     }
 
     getDims() {
@@ -13,9 +14,9 @@ export class DefaultDimensions {
 
     private static instance: DefaultDimensions
 
-    static initiate() {
-        DefaultDimensions.instance = new DefaultDimensions();
-    }
+    // static initiate() {
+    //     DefaultDimensions.instance = new DefaultDimensions();
+    // }
 
     static getInstance() {
         return DefaultDimensions.instance;
