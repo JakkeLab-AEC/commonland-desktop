@@ -3,6 +3,7 @@ export const DB_TABLENAMES = {
     BORINGS: 'borings',
     LAYERS: 'layers',
     SPT_RESULTS: 'spt_results',
+    LAYER_COLORS: 'layer_colors',
 } as const;
 
 /**

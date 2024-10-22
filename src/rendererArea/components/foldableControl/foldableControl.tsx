@@ -13,7 +13,7 @@ export const FoldableControl:React.FC<FoldableListProps> = ({title, children}) =
     };
 
     return (
-        <div>
+        <div className="h-full w-full" style={{position: 'relative'}}>
           <div className="flex flex-row gap-2 mt-1 mb-1">
             <div>
                 {title}
@@ -24,7 +24,7 @@ export const FoldableControl:React.FC<FoldableListProps> = ({title, children}) =
             </div>
           </div>
           {isOpen && (
-            <div className="flex flex-col gap-2 mb-2">
+            <div className="flex flex-col h-full gap-2 mb-2">
                 {children}
             </div>
           )}
