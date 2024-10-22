@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { DefaultDimensions } from './defaultConfigs/DefaultDimensionConfigs';
 
 export class SceneController {
 
@@ -349,6 +350,9 @@ export class SceneController {
         const directionalLight = new THREE.DirectionalLight('white', 1);
         directionalLight.position.set(5, 10, 7.5);
         targetScene.add(directionalLight);
+
+        // Default dim sets
+        // DefaultDimensions.initiate();
     
         //Render
         function initiateRender() {

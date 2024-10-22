@@ -3,11 +3,12 @@ import React from "react"
 interface ListBoxItemProps {
     id: string,
     displayText: string;
+    isChecked?: boolean
     onCheckedHandler?: (id: string, isChecked: boolean) => void;
     onClickItemHandler?: (id: string) => void;
 }
 
-export const ListBoxItem:React.FC<ListBoxItemProps> = ({id, displayText, onCheckedHandler, onClickItemHandler}) => {
+export const ListBoxItem:React.FC<ListBoxItemProps> = ({id, displayText, isChecked = false, onCheckedHandler, onClickItemHandler}) => {
 
     const onChekcedWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
         if(onCheckedHandler) {
@@ -21,13 +22,13 @@ export const ListBoxItem:React.FC<ListBoxItemProps> = ({id, displayText, onCheck
         }
     }
     
-    
     return (
-        <div className="flex flex-row gap-2 h-[32px] items-center">
+        <div className="flex flex-row gap-2 h-[32px] items-center" key={id}>
             <div>
                 <input 
                     type='checkbox'
-                    onChange={onChekcedWrapper}/>
+                    onChange={onChekcedWrapper}
+                    checked={isChecked}/>
             </div>
             <div className="" onClick={onClickWrapper} style={{cursor: 'pointer'}}>
                 {displayText}

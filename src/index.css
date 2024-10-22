@@ -10,7 +10,7 @@ body {
   /* Background : Blue */
   background-color: #0045FB;
   /* Text : White */
-  color: white
+  color: 'white'
 }
 
 .main-header{

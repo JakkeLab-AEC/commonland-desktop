@@ -5,6 +5,7 @@ import SamplePage from "./pages/samplePage";
 import { TestPage } from "./pages/testPage";
 import { BoringManager } from "./pages/editor/EditorPage";
 import { useLanguageStore } from "../language/languageStore";
+import { BoringBatcher } from "./pages/batchBorings/boringBatchers";
 
 export default function Sidebar() {
     const [currentMenuIndex, setCurrentMenuIndex] = useState(1);
@@ -20,14 +21,14 @@ export default function Sidebar() {
     } = useLanguageStore();
 
     const menuNavigations: Array<{menuName:string, menuPage: JSX.Element, displayHeader: string, menuClickHandler: (index: number) => void}> = [{
-        menuName: "SA", 
-        menuPage: (<SamplePage />),
-        displayHeader: 'Sample',
-        menuClickHandler: navigateMenu
-    }, {
         menuName: "Editor", 
         menuPage: (<BoringManager />), 
         displayHeader: findValue('BoringManager', 'pageHeader'),
+        menuClickHandler: navigateMenu
+    }, {
+        menuName: "Batcher", 
+        menuPage: (<BoringBatcher />), 
+        displayHeader: '시추공 배치',
         menuClickHandler: navigateMenu
     }, {
         menuName: "TEST", 

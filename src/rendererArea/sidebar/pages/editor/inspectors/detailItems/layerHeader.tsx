@@ -1,7 +1,11 @@
 import React from "react"
-import ButtonPositive from '../../../../../components/buttons/buttonPositive';
+import {ButtonPositive} from '../../../../../components/buttons/buttonPositive';
 
-export const LayerSetHeader = () => {
+interface LayerSetHeaderProps {
+    onCreate: () => void;
+}
+
+export const LayerSetHeader:React.FC<LayerSetHeaderProps> = ({onCreate}) => {
     return (
         <div className="flex flex-row h-[32px] items-center">
             <div className="w-[32px]">
@@ -14,7 +18,7 @@ export const LayerSetHeader = () => {
                 층후
             </div>
             <div>
-                <ButtonPositive text={"추가"} width={48}/>
+                <ButtonPositive text={"추가"} width={48} isEnabled={true} onClickHandler={onCreate}/>
             </div>
         </div>
     )
