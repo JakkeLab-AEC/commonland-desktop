@@ -15,6 +15,7 @@ export class Boring extends ServiceModel {
     private sptResultSet: SPTResultSet;
 
     private isBatched: boolean;
+    private isBatchable: boolean;
 
     addLayer(layer: Layer) {
         this.layers.push(layer);

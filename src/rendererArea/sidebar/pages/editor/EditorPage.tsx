@@ -8,6 +8,7 @@ import {ButtonPositive} from "../../../../rendererArea/components/buttons/button
 import {ButtonNegative} from "../../../../rendererArea/components/buttons/buttonNegative";
 import { useEditorPageStore } from "./EditorPageStore";
 import { Boring } from "../../../../mainArea/models/serviceModels/boring/boring";
+import { Layer } from "../../../../mainArea/models/serviceModels/boring/layer";
 
 interface InspectorContent {
     boring: Boring
@@ -112,7 +113,8 @@ export const BoringManager = () => {
         }
 
         const newBoring = new Boring(boringName, 0, 0, 0, 0);
-      
+        newBoring.addLayer(new Layer('레이어', 1));
+
         // Insert new boring
         await insertBoring(newBoring);
       
@@ -175,6 +177,11 @@ export const BoringManager = () => {
 
     useEffect(() => {
         fetchAllBorings();
+
+        return () => {
+            setInspectorContent(null);
+            setInspectorVisiblity(false);
+        }
     }, []);
     
     const onChangeNamingMode =(e:ChangeEvent<HTMLInputElement>) => {

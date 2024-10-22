@@ -2,8 +2,65 @@ import * as THREE from 'three';
 import { DefaultDimensions } from '../defaultConfigs/DefaultDimensionConfigs';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { LayerColorConfig } from '../../../../mainArea/models/uimodels/layerColorConfig';
+import { Boring } from '../../../../mainArea/models/serviceModels/boring/boring';
+import { colorPaletteValues } from '../../../../public/colorPalette';
+
 
 export class ThreeBoringPost {
+    static async createPostFromModel(boring: Boring, layerColorConfig: LayerColorConfig):Promise<THREE.Object3D[]> {
+        console.log(layerColorConfig.getAllLayerColors());
+        const layers = boring.getLayers().map(r=>{ return {
+            name: r.getName(),
+            thickness: r.getThickness(),
+            color: parseInt(colorPaletteValues[layerColorConfig.getLayerColor(r.getName())].slice(1), 16)
+        }})
+
+        const sptValues = boring.getSPTResultSet().getAllResults();
+
+        const threeItems = await ThreeBoringPost.createPost(
+            boring.getName(),
+            boring.getTopoTop(),
+            layers,
+            sptValues
+        );
+
+        const moveMatrix = new THREE.Matrix4()
+        moveMatrix.makeTranslation(boring.getLocationX(), 0, boring.getLocationY());
+        
+        const threeObjs: THREE.Object3D[] = [];
+
+        threeItems.sptObjects.forEach(obj => {
+            obj.leaderLine.applyMatrix4(moveMatrix);
+            obj.textDepthObject.applyMatrix4(moveMatrix);
+            obj.textSPTResultObject.applyMatrix4(moveMatrix);
+            threeObjs.push(obj.leaderLine);
+            threeObjs.push(obj.textDepthObject);
+            threeObjs.push(obj.textSPTResultObject);
+        })
+
+        threeItems.postSegments.forEach(obj => {
+            obj.textMesh.applyMatrix4(moveMatrix);
+            obj.postMesh.applyMatrix4(moveMatrix);
+            obj.leaderLine.applyMatrix4(moveMatrix);
+            threeObjs.push(obj.textMesh);
+            threeObjs.push(obj.postMesh);
+            threeObjs.push(obj.leaderLine);
+        })
+
+        threeItems.postNameLeader.leaderLine.applyMatrix4(moveMatrix);
+        threeItems.postNameLeader.textMesh.applyMatrix4(moveMatrix);
+        threeObjs.push(threeItems.postNameLeader.leaderLine);
+        threeObjs.push(threeItems.postNameLeader.textMesh);
+
+        threeItems.boringEndLeader.textMesh.applyMatrix4(moveMatrix);
+        threeItems.boringEndLeader.leaderLine.applyMatrix4(moveMatrix);
+        threeObjs.push(threeItems.boringEndLeader.textMesh);
+        threeObjs.push(threeItems.boringEndLeader.leaderLine);
+
+        return threeObjs;
+    }
+    
     static async createPost(boringName: string, topoTop: number, layers:{name: string, thickness:number, color: number}[], sptValues: {depth: number, hitCount: number, distance: number}[]) {
         const dims = DefaultDimensions.getInstance().getDims();
         const radius = dims.shoringPostRadius;

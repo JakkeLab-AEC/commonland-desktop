@@ -4,6 +4,7 @@ import { ThreeBoringPost } from "../../../rendererArea/api/three/predefinedCreat
 import { ButtonPositive } from "../../../rendererArea/components/buttons/buttonPositive"
 import React from "react"
 import { DXFWriter, Layer, Text, Line, Block, BlockInsert } from "../../../rendererArea/api/dxfwriter/dxfwriter"
+import { ColorIndexPalette } from "../../../rendererArea/components/palette/colorIndexPalette"
 
 export const TestPage = () => {
     const testAddPost = async () => {
@@ -61,6 +62,10 @@ export const TestPage = () => {
     const testDXFWriterWithStyle = () => {
 
     }
+
+    const testOnSelectColor = (index: number) => {
+        console.log(index);
+    }
     
     return (
         <div>
@@ -68,6 +73,7 @@ export const TestPage = () => {
             <ButtonPositive text={"Download Scene OBJ"} isEnabled={true} onClickHandler={testDownloadScene}/>
             <ButtonPositive text={"Test DXF Export Empty"} isEnabled={true} onClickHandler={testDXFWriter}/>
             <ButtonPositive text={"Test DXF Export Text"} isEnabled={true} onClickHandler={testDXFWriterWithEntity}/>
+            <ColorIndexPalette width={'full'} height={120} onClickHandler={testOnSelectColor} headerName="Colors" />
         </div>
     )
 }

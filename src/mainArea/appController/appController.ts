@@ -1,6 +1,6 @@
 import { Database } from "sqlite";
 import { UIController } from "./uicontroller/uicontroller";
-import { openDB } from "./repositoryConfig";
+import { openDB, truncateDB } from "./repositoryConfig";
 import { BoringRepository } from "../repository/boringRepository";
 
 type RepositoryTypes = 'Boring'|'LandInfo'|'Topo'
@@ -35,5 +35,9 @@ export class AppController {
                 return this.boringRepository;
             }
         }
+    }
+
+    async truncateDB() {
+        await truncateDB(this.db);
     }
 }

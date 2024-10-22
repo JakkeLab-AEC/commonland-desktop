@@ -9,21 +9,21 @@ import { VisibilityOptions } from "./homescreenitems/visibilityOptions";
 
 export default function HomeScreen() {
     return (
-        <div>
+        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <div style={{position: 'absolute', width:'100%'}}>
                 <Header appName={appInfo.ApplicationName} />
             </div>
             <div id="main-sidebar" style={{position:'absolute', justifyContent: 'center', top: 64, bottom: 16}}>
                 <Sidebar />
             </div>
-            <div style={{position:'absolute', justifyContent: 'center', top: 64, bottom: 16, left: 340}}>
+            <div style={{position:'absolute', justifyContent: 'center'}}>
                 <InspectorWrapper />
             </div>
             <div>
                 <ThreeViewPort />
             </div>
             <div style={{position: 'absolute', right: 16, bottom: 16}}>
-                <VisibilityOptions/>
+                {/* <VisibilityOptions/> */}
             </div>
         </div>
     )

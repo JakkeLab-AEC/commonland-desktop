@@ -9,6 +9,8 @@ export const InspectorWrapper:React.FC = () => {
         inspectorTitle,
         inspetorContent,
         inspectorSize,
+        inspectorPositonTop,
+        inspectorPositonLeft,
         setInspectorVisiblity,
     } = useHomeStore();
     
@@ -17,7 +19,7 @@ export const InspectorWrapper:React.FC = () => {
     }
 
     return (
-        <div>
+        <div style={{ position: 'absolute', top: inspectorPositonTop, left: inspectorPositonLeft }}>
             {inspectorVisibility && 
             <Inspector 
                 title={inspectorTitle} 

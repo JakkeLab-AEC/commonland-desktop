@@ -42,6 +42,11 @@ interface SptResultData {
 type BoringWithLayer = BoringData & LayerData ;
 type BoringWithSPT = BoringData & SptResultData;
 
+interface LayerColorData {
+    name: string,
+    color_index: number,
+}
+
 export class BoringRepository implements BoringCRUDMethods {
     private db: Database;
     
@@ -173,7 +178,6 @@ export class BoringRepository implements BoringCRUDMethods {
     }
 
     async insertBoring(boringDto: BoringDTO): Promise<{result: boolean, message?: string}> {
-        console.log(boringDto);
         const boringColumns = ['boring_id', 'name', 'location_x', 'location_y', 'topo_top', 'underground_water', 'is_batched'];
         const layerColumns = ['layer_id', 'boring_id', 'layer_index', 'name', 'thickness'];
         const sptResultColumns = ['spt_id', 'boring_id', 'depth', 'hitCount', 'distance'];
@@ -456,6 +460,36 @@ export class BoringRepository implements BoringCRUDMethods {
                 error: true,
                 message: error
             }
+        }
+    }
+
+    async getAllLayerColors(): Promise<{result: boolean, message?: string, layerColors?: [string, number][]}> {
+        const query =`
+            SELECT * FROM ${DB_TABLENAMES.LAYER_COLORS};
+        `;
+        
+        try {
+            const layerColors: [string, number][] = [];
+            const results:LayerColorData[] = await this.db.all(query);
+            for(const result of results) {
+                layerColors.push([result.name, result.color_index]);
+            }
+
+            return {result: true, layerColors: layerColors}
+        } catch (error) {
+            console.log(error);
+            return {result: false, message: error}
+        }
+    }
+
+    async updateLayerColor(layerName: string, colorIndex: number): Promise<{result: boolean, message?: string}> {
+        const query = RepositryQueryBuilder.buildUpdateQuery(DB_TABLENAMES.LAYER_COLORS, ['name', 'color_index'], 'name');
+        try {
+            await this.db.all(query, [layerName, colorIndex, layerName]);
+            return {result: true}
+        } catch (error) {
+            console.log(error);
+            return {result: false, message: error}
         }
     }
 }

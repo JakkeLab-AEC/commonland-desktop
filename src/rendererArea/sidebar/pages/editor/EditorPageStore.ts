@@ -9,8 +9,8 @@ interface EditorPageStore {
     checkedBoringIds:Set<string>;
     fetchAllBorings:() => Promise<void>;
     createNewBoring: () => void;
-    insertBoring: (boring: Boring) => void;
-    updateBoring: (boring: Boring) => void;
+    insertBoring: (boring: Boring) => Promise<void>;
+    updateBoring: (boring: Boring) => Promise<void>;
     registerUpdateEventListner: (listner: () => void) => void;
     removeBoring: (id: string[]) => Promise<boolean>;
     selectBoring: (id: string) => Boring;

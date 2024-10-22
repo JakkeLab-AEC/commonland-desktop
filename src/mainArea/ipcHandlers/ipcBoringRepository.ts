@@ -43,4 +43,14 @@ export const setIpcBoringRepository = (ipcMain: IpcMain) => {
         const updateBatchJob = await AppController.getInstance().getRepository('Boring').updateBoringBatch(idAndOptions);
         return updateBatchJob;
     })
+
+    ipcMain.handle('boring-repository-layer-colors-fetchall', async(_) => {
+        const fetchAllLayerColorsJob = await AppController.getInstance().getRepository('Boring').getAllLayerColors();
+        return fetchAllLayerColorsJob;
+    });
+
+    ipcMain.handle('boring-repository-layer-colors-update', async(_, layerName: string, colorIndex: number) => {
+        const updateLayerColorJob = await AppController.getInstance().getRepository('Boring').updateLayerColor(layerName, colorIndex);
+        return updateLayerColorJob;
+    });
 }

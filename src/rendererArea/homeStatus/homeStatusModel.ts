@@ -7,10 +7,13 @@ interface homeStatusProps {
     inspetorContent: ReactNode;
     inspectorTitle: string,
     inspectorClosingListeners: Array<() => void>,
+    inspectorPositonTop: number,
+    inspectorPositonLeft: number,
     setInspectorTitle: (title: string) => void,
     setInspectorVisiblity: (visiblity: boolean) => void,
     setInspectorSize: (option: {width: number, height: number}) => void,
     setInspectorContent: (content: ReactNode) => void,
+    setInspectorPosition: (top?: number, left?: number) => void;
     registerInspectorClosingListner: (listener: () => void) => void,
 }
 
@@ -20,6 +23,8 @@ export const useHomeStore = create<homeStatusProps>((set, get) => ({
     inspetorContent: null,
     inspectorTitle: "Default Inspector",
     inspectorClosingListeners: [],
+    inspectorPositonTop: 64,
+    inspectorPositonLeft: 340,
     setInspectorVisiblity: (visibility: boolean) => {
         const listeners = get().inspectorClosingListeners;
         if(!visibility) {
@@ -58,5 +63,20 @@ export const useHomeStore = create<homeStatusProps>((set, get) => ({
                 inspectorClosingListeners: listeners
             }
         })
-    }
+    },
+    setInspectorPosition:(top?: number, left?: number) => {
+        let [updatedTop, updatedLeft] = [get().inspectorPositonTop, get().inspectorPositonLeft]
+        if(top)
+            updatedTop = top;
+
+        if(left)
+            updatedLeft = left;
+        
+        set(() => {
+            return {
+                inspectorPositonTop: updatedTop,
+                inspectorPositonLeft: updatedLeft,
+            }
+        })
+    },
 }));

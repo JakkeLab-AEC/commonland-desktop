@@ -37,6 +37,44 @@ export const InspectorBoringEdit: React.FC<BoringEditorProps> = ({boring}) => {
     }
 
     const onClickSave = async () => {
+        if(boring.getLayers().length == 0) {
+            alert('레이어는 1개이상 배치해야 합니다.');
+            return;
+        }
+
+        let isAllLayerNameIsNotBlank = true;
+        const invalidLayerNames: string[] = [];
+        let isAllLayerValidThickness = true;
+        const invalidLayerThicknesses: string[] = [];
+        for(const layer of boring.getLayers()){
+            if(layer.getName().length == 0) {
+                isAllLayerNameIsNotBlank = false;
+                invalidLayerNames.push(layer.getName());
+            }
+
+            if(layer.getThickness() <= 0) {
+                isAllLayerValidThickness = false;
+                invalidLayerNames.push(layer.getName());
+            }
+        }
+
+        if(!isAllLayerNameIsNotBlank || !isAllLayerValidThickness) {
+            let alertMessage = '유효하지 않은 레이어 항목이 있습니다.\n';
+        
+            if(invalidLayerNames.length > 0) {
+                alertMessage += `- 공란인 레이어 발생\n`;
+            }
+        
+            if(invalidLayerThicknesses.length > 0) {
+                alertMessage += `- 유효하지 않은 레이어 두께 (0 이하): ${invalidLayerThicknesses.join(', ')}\n`;
+            }
+        
+            alertMessage += '해당 항목을 확인해 주세요.';
+            alert(alertMessage);
+        
+            return;
+        }
+
         const newInspectorWindowTitle = `${findValue('BoringEditor', 'editorHeader')} : ${boring.getName().length > 16 ? boring.getName().substring(0, 15)+'...' : boring.getName()}`;
         const updateInspectorTitle = () => {
             setInspectorTitle(newInspectorWindowTitle)

@@ -1,3 +1,4 @@
+import { LayerColorConfig } from "../../../../mainArea/models/uimodels/layerColorConfig";
 import { Boring } from "../../../../mainArea/models/serviceModels/boring/boring";
 import { create } from "zustand";
 
@@ -6,11 +7,14 @@ interface BoringBatcherStore {
     unbacthedBoringDisplayItems: Map<string, {displayString: string, checked: boolean}>;
     batchedBorings: Map<string, Boring>;
     bacthedBoringDisplayItems: Map<string, {displayString: string, checked: boolean}>;
+    layerColorConfig: LayerColorConfig
     fetchAllBorings:() => void;
     batchBorings: (ids: string[]) => void;
     unbatchBorings: (ids: string[]) => void;
     updateBatchedBoringDisplayItem: (id: string, checked: boolean) => void;
     updateUnbatchedBoringDisplayItem: (id: string, checked: boolean) => void;
+    fetchAllLayerColors:() => void,
+    updateLayerColor:(name: string, colorIndex: number) => void;
 }
 
 function boringSort(a: string, b: string): number {
@@ -35,6 +39,7 @@ export const useBoringBatcherStore = create<BoringBatcherStore>((set, get) => ({
     unbacthedBoringDisplayItems: new Map(),
     batchedBorings: new Map(),
     bacthedBoringDisplayItems: new Map(),
+    layerColorConfig: new LayerColorConfig([]),
     fetchAllBorings: async () => {
         const batchedBorings: Map<string, Boring> = new Map();
         const bacthedBoringDisplayItems: Map<string, {displayString: string, checked: boolean}> = new Map();
@@ -162,5 +167,21 @@ export const useBoringBatcherStore = create<BoringBatcherStore>((set, get) => ({
         items.get(id).checked = checked;
 
         set(() => {return {unbacthedBoringDisplayItems : items}});
-    }
+    },
+    fetchAllLayerColors: async () => {
+        const fetchJob = await window.electronBoringDataAPI.getAllLayerColors();
+        if(fetchJob.result) {
+            set(() => {return {layerColorConfig: new LayerColorConfig(fetchJob.layerColors)}})
+        }
+    }, 
+    updateLayerColor: async (name: string, colorIndex: number) => {
+        const updateJob = await window.electronBoringDataAPI.updateLayerColor(name, colorIndex);
+        console.log(updateJob);
+        if(!updateJob.result) return;
+
+        const fetchJob = await window.electronBoringDataAPI.getAllLayerColors();
+        if(fetchJob.result) {
+            set(() => {return {layerColorConfig: new LayerColorConfig(fetchJob.layerColors)}})
+        }
+    },
 }));
