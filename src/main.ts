@@ -3,6 +3,7 @@ import path from 'path';
 import { setIpcWindowControl } from './mainArea/ipcHandlers/ipcWindowControl';
 import { AppController } from './mainArea/appController/appController';
 import { setIpcBoringRepository } from './mainArea/ipcHandlers/ipcBoringRepository';
+import { setIpcProjectIOHandler } from './mainArea/ipcHandlers/ipcProjectFile';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -42,6 +43,8 @@ app.on('ready', () => {
   setIpcWindowControl(ipcMain);
 
   setIpcBoringRepository(ipcMain);
+
+  setIpcProjectIOHandler(ipcMain);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

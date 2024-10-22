@@ -1,22 +1,25 @@
-import React, { useState } from "react";
 import './sidebarstyle.css';
 import Button from "./iconButton";
-import SamplePage from "./pages/samplePage";
 import { TestPage } from "./pages/testPage";
 import { BoringManager } from "./pages/editor/EditorPage";
 import { useLanguageStore } from "../language/languageStore";
 import { BoringBatcher } from "./pages/batchBorings/boringBatchers";
+import { useSidebarStore } from "./sidebarStore";
 
 export default function Sidebar() {
-    const [currentMenuIndex, setCurrentMenuIndex] = useState(1);
+    const {
+        navigationIndex,
+        setNaviationIndex
+    } = useSidebarStore();
+
 
     const navigateMenu = (index: number) => {
-        setCurrentMenuIndex(index);
+        setNaviationIndex(index);
     };
 
+    
+
     const {
-        localeCode,
-        displayStrings,
         findValue,
     } = useLanguageStore();
 
@@ -42,19 +45,19 @@ export default function Sidebar() {
         <div className="w-[334px] h-full flex flex-row" style={{borderWidth: 1, borderColor: 'silver', borderTopRightRadius: 8, borderBottomRightRadius: 8}}>
             <div className="h-full w-12 flex flex-col" style={{backgroundColor: "#ECECEC"}}>
                 {menuNavigations.map((item, index) => {
-                    const isEnabled = index == currentMenuIndex ? true : false;
+                    const isEnabled = index == navigationIndex ? true : false;
                     if(item.menuName != null || item.menuName == '' && item.menuPage != null || item.menuClickHandler != null)
                         return <Button key={index} menuName={item.menuName} isEnabled={isEnabled} navigateHandler={item.menuClickHandler} index={index}/>
                 })}
             </div>
             <div className="flex-grow flex flex-col gap-1 pb-8" style={{backgroundColor: 'white', borderTopRightRadius: 8, borderBottomRightRadius: 8, padding: 8}}>
                 <div style={{fontWeight: 700, fontSize: 20}}>
-                    {menuNavigations[currentMenuIndex].displayHeader}
+                    {menuNavigations[navigationIndex].displayHeader}
                 </div>
                 <hr style={{borderBottomWidth: 0.25, borderColor: 'silver'}}/>
                 <div className="mt-1 h-full overflow-y-auto sidebar-area">
                     {/* Menu Page */}
-                    {menuNavigations[currentMenuIndex].menuPage}
+                    {menuNavigations[navigationIndex].menuPage}
                 </div>
             </div>
         </div>
