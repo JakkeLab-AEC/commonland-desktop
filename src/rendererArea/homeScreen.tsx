@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./sidebar/sidebar";
 import './homeStyle.css'
 import Header from "./components/header/header";
@@ -6,8 +6,9 @@ import { appInfo } from "../../appConfig";
 import { ThreeViewPort } from "./components/threeViewport/threeViewport";
 import { InspectorWrapper } from "./components/inspector/inspectorWrapper";
 import { VisibilityOptions } from "./homescreenitems/visibilityOptions";
+import { useHomeStore } from "./homeStatus/homeStatusModel";
 
-export default function HomeScreen() {
+export default function HomeScreen() {    
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <div style={{position: 'absolute', width:'100%'}}>
