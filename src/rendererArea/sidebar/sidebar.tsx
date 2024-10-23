@@ -5,41 +5,50 @@ import { BoringManager } from "./pages/editor/EditorPage";
 import { useLanguageStore } from "../language/languageStore";
 import { BoringBatcher } from "./pages/batchBorings/boringBatchers";
 import { useSidebarStore } from "./sidebarStore";
+import { useEffect, useState } from 'react';
+import { useHomeStore } from '../homeStatus/homeStatusModel';
 
 export default function Sidebar() {
+    const {
+        findValue,
+    } = useLanguageStore();
+
+    const {
+        currentHomeId,
+    } = useHomeStore();
+
+    const [homeId, setHomeId] = useState<string>(currentHomeId);
+    
     const {
         navigationIndex,
         setNaviationIndex
     } = useSidebarStore();
 
-
     const navigateMenu = (index: number) => {
         setNaviationIndex(index);
     };
 
-    
-
-    const {
-        findValue,
-    } = useLanguageStore();
-
     const menuNavigations: Array<{menuName:string, menuPage: JSX.Element, displayHeader: string, menuClickHandler: (index: number) => void}> = [{
-        menuName: "Editor", 
-        menuPage: (<BoringManager />), 
-        displayHeader: findValue('BoringManager', 'pageHeader'),
-        menuClickHandler: navigateMenu
-    }, {
-        menuName: "Batcher", 
-        menuPage: (<BoringBatcher />), 
-        displayHeader: '시추공 배치',
-        menuClickHandler: navigateMenu
-    }, {
-        menuName: "TEST", 
-        menuPage: (<TestPage />), 
-        displayHeader: 'Test',
-        menuClickHandler: navigateMenu
-    },
-];
+            menuName: "Editor", 
+            menuPage: (<BoringManager />), 
+            displayHeader: findValue('BoringManager', 'pageHeader'),
+            menuClickHandler: navigateMenu
+        }, {
+            menuName: "Batcher", 
+            menuPage: (<BoringBatcher />), 
+            displayHeader: '시추공 배치',
+            menuClickHandler: navigateMenu
+        }, {
+            menuName: "TEST", 
+            menuPage: (<TestPage />), 
+            displayHeader: 'Test',
+            menuClickHandler: navigateMenu
+        },
+    ];
+
+    useEffect(() => {
+        setHomeId(homeId);
+    },[currentHomeId])
     
     return (
         <div className="w-[334px] h-full flex flex-row" style={{borderWidth: 1, borderColor: 'silver', borderTopRightRadius: 8, borderBottomRightRadius: 8}}>

@@ -1,4 +1,3 @@
-'use client';
 import ServiceLogo from "./logo/servicelogo";
 import { ButtonPositive } from "../buttons/buttonPositive";
 import { useState } from "react";
