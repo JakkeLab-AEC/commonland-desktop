@@ -31,6 +31,58 @@ export async function openDB() {
     }
 }
 
+const updateLayerTrigger = `
+    CREATE TRIGGER update_layer_color_on_name_change
+    AFTER UPDATE ON ${DB_TABLENAMES.LAYERS}
+    FOR EACH ROW
+    BEGIN
+        -- 새로운 이름이 기존 레이어에 존재하지 않는 경우에만 색상 추가
+        INSERT OR IGNORE INTO ${DB_TABLENAMES.LAYER_COLORS} (name, color_index)
+        VALUES (NEW.name, 1);
+
+        -- 기존 이름이 더 이상 사용되지 않으면 색상 삭제
+        DELETE FROM ${DB_TABLENAMES.LAYER_COLORS}
+        WHERE name = OLD.name
+        AND NOT EXISTS (
+            SELECT 1 FROM ${DB_TABLENAMES.LAYERS} WHERE name = OLD.name
+        );
+
+        -- 병합된 경우 중복된 색상 삭제
+        DELETE FROM ${DB_TABLENAMES.LAYER_COLORS}
+        WHERE name = NEW.name
+        AND EXISTS (
+            SELECT 1 FROM ${DB_TABLENAMES.LAYER_COLORS} WHERE name = OLD.name
+        );
+    END;
+`;
+
+const insertLayerTrigger = `
+    CREATE TRIGGER insert_layer_color_if_not_exists
+    AFTER INSERT ON ${DB_TABLENAMES.LAYERS}
+    FOR EACH ROW
+    WHEN (NEW.name IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM ${DB_TABLENAMES.LAYER_COLORS} WHERE name = NEW.name
+    ))
+    BEGIN
+        INSERT INTO 
+            ${DB_TABLENAMES.LAYER_COLORS} (name, color_index)
+        VALUES
+            (NEW.name, 1);
+    END;
+`;
+
+const removeLayerTrigger = `
+    CREATE TRIGGER delete_layer_color_if_no_layers
+    AFTER DELETE ON ${DB_TABLENAMES.LAYERS}
+    FOR EACH ROW
+    WHEN NOT EXISTS (
+        SELECT 1 FROM ${DB_TABLENAMES.LAYERS} WHERE name = OLD.name
+    )
+    BEGIN
+        DELETE FROM ${DB_TABLENAMES.LAYER_COLORS} WHERE name = OLD.name;
+    END;
+`;
+
 async function initializeDB(db: Database) {
     //DB Truncate : Delete all table
     await db.run("PRAGMA foreign_keys = OFF;");
@@ -44,6 +96,7 @@ async function initializeDB(db: Database) {
         // 테이블에 해당하는 트리거 삭제
         await db.run(`DROP TRIGGER IF EXISTS insert_layer_color_if_not_exists;`);
         await db.run(`DROP TRIGGER IF EXISTS delete_layer_color_if_no_layers;`);
+        await db.run(`DROP TRIGGER IF EXISTS update_layer_color_on_name_change;`);
         await db.run(`DROP TABLE IF EXISTS "${name}";`);
     }
     
@@ -152,7 +205,7 @@ async function initializeDB(db: Database) {
     await db.run("PRAGMA foreign_keys = ON;");
 }
 
-export async function truncateDB(db: Database) {
+export async function truncateDBHard(db: Database) {
     try {
         await db.run('PRAGMA foreign_keys = OFF');
 
@@ -166,10 +219,44 @@ export async function truncateDB(db: Database) {
             // 테이블에 해당하는 트리거 삭제
             await db.run(`DROP TRIGGER IF EXISTS insert_layer_color_if_not_exists;`);
             await db.run(`DROP TRIGGER IF EXISTS delete_layer_color_if_no_layers;`);
+            await db.run(`DROP TRIGGER IF EXISTS delete_layer_color_if_no_layers;`);
             await db.run(`DROP TABLE IF EXISTS "${name}";`);
         }
 
         console.log('Dropped all tables.');
+    } catch (error) {
+        console.error('Failed to truncate database:', error);
+        throw error;
+    }
+}
+
+export async function truncateDBSoft(db: Database) {
+    try {
+        // Turn off foreign key constrain
+        await db.run('PRAGMA foreign_keys = OFF');
+
+        // Remove triggers
+        await db.run(`DROP TRIGGER IF EXISTS update_layer_color_on_name_change;`);
+        await db.run(`DROP TRIGGER IF EXISTS insert_layer_color_if_not_exists;`);
+        await db.run(`DROP TRIGGER IF EXISTS delete_layer_color_if_no_layers;`);
+
+        // Import table list and remove all rows
+        const tables = await db.all(`
+            SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';
+        `);
+
+        for (const { name } of tables) {
+            console.log(`Deleting all rows from table: ${name}`);
+            await db.run(`DELETE FROM "${name}";`);
+        }
+
+        // Restore triggers
+        await db.run(updateLayerTrigger);
+        await db.run(insertLayerTrigger);
+        await db.run(removeLayerTrigger);
+
+        // Turn on foreign key constrain
+        await db.run('PRAGMA foreign_keys = ON');
     } catch (error) {
         console.error('Failed to truncate database:', error);
         throw error;

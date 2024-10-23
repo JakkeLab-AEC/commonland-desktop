@@ -1,6 +1,6 @@
 import type { ConfigEnv, UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
-import { getBuildConfig, getBuildDefine, external, pluginHotRestart } from './vite.base.config';
+import { getBuildConfig, getBuildDefine, pluginHotRestart } from './vite.base.config';
 import path from 'path';
 
 // https://vitejs.dev/config
@@ -16,11 +16,11 @@ export default defineConfig((env) => {
         formats: ['cjs'],
       },
       rollupOptions: {
-        external,
+        external: [ 'sqlite', 'sqlite3'],
       },
     },
     plugins: [
-      pluginHotRestart('restart'), 
+      pluginHotRestart('restart'),
     ],
     css: {
       postcss: './postcss.config.js'

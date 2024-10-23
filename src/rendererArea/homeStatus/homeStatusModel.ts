@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import { create } from "zustand";
+import { v4 as uuidv4 } from 'uuid';
 
 interface homeStatusProps {
+    currentHomeId: string;
     inspectorVisibility: boolean,
     inspectorSize: {width: number, height: number},
     inspetorContent: ReactNode;
@@ -9,6 +11,7 @@ interface homeStatusProps {
     inspectorClosingListeners: Array<() => void>,
     inspectorPositonTop: number,
     inspectorPositonLeft: number,
+    updateHomeId: () => void,
     setInspectorTitle: (title: string) => void,
     setInspectorVisiblity: (visiblity: boolean) => void,
     setInspectorSize: (option: {width: number, height: number}) => void,
@@ -18,6 +21,7 @@ interface homeStatusProps {
 }
 
 export const useHomeStore = create<homeStatusProps>((set, get) => ({
+    currentHomeId: uuidv4(),
     inspectorVisibility: false,
     inspectorSize: {width: 360, height: 420},
     inspetorContent: null,
@@ -78,5 +82,8 @@ export const useHomeStore = create<homeStatusProps>((set, get) => ({
                 inspectorPositonLeft: updatedLeft,
             }
         })
+    },
+    updateHomeId:() => {
+        set(() => {return {currentHomeId: uuidv4()}});
     },
 }));

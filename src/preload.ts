@@ -20,3 +20,8 @@ contextBridge.exposeInMainWorld('electronBoringDataAPI', {
     getAllLayerColors: () => ipcRenderer.invoke('boring-repository-layer-colors-fetchall'),
     updateLayerColor: (layerName: string, colorIndex: number) => ipcRenderer.invoke('boring-repository-layer-colors-update', layerName, colorIndex),
 })
+
+contextBridge.exposeInMainWorld('electronProjectIOAPI', {
+    saveProject: () => ipcRenderer.invoke('project-file-save'),
+    openProject: () => ipcRenderer.invoke('project-file-read'),
+})
